@@ -93,9 +93,18 @@ class StrippedAwsInstance:
             
         # If one is valid and the other is not, they are not equal.
         return False
-        
+
     def __hash__(self):
-        return hash(self.id)
+        if self.is_valid:
+            return hash(self.id)
+        else:
+            return hash(self.identifier)
+
+    def __repr__(self):
+        if self.is_valid:
+            return f"StrippedAwsInstance(id='{self.id}', name='{self.name}')"
+        else:
+            return f"StrippedAwsInstance(invalid_identifier='{self.identifier}')"
             
 class InstanceGroup:
     def __init__(self, ec2_client=None, initial_instances: Optional[List[str]] = None): 
