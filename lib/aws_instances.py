@@ -134,6 +134,7 @@ class InstanceGroup:
                 # A resolved instance could still be a duplicate if added via a different alias
                 # (e.g., adding by ID when it was already added by name). The set handles this.
                 if instance not in self.instances:
+                    logging.debug(f"{type(self.instances)}")
                     self.instances.add(instance)
                     # Add the new instance's ID and name to our lookup set for this session
                     existing_identifiers.add(instance.id)
