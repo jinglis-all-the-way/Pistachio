@@ -65,6 +65,7 @@ class AwsInstance:
         
 class StrippedAwsInstance:
     def __init__(self, identifier: str, ec2_client=None):
+        self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
         heavy_instance = AwsInstance(identifier, ec2_client)
         
         self.id = None
@@ -89,8 +90,7 @@ class StrippedAwsInstance:
         return hash(self.id)
             
 class InstanceGroup:
-    def __init__(self, ec2_client=None, ec2_resource=None, initial_instances: Optional[Set[str]] = None): 
-        self.ec2_resource =  ec2_resource if ec2_resource is not None else boto3.resource('ec2')
+    def __init__(self, ec2_client=None, initial_instances: Optional[Set[str]] = None): 
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
         self.instances = set()
         logging.debug("Created new InstanceGroup object")
@@ -98,17 +98,17 @@ class InstanceGroup:
         if initial_instances:
             self.add_instances(initial_instances)
 
-    def add_instances(self, instance_list: Set[str]):
+    def add_instances(self, instance_list: List[str]):
         if not instance_list:
             logging.warning("No instances specified to add")
             return
             
         for item in instance_list:
-            this_instance = StrippedAwsInstance(self.ec2_client, self.ec2_resource, item)
+            this_instance = StrippedAwsInstance(self.ec2_client, item)
             if this_instance.isValid():
                 if this_instance not in self.instances:
                     logging.info(f"Adding instance to group : '{item}'")
-                    self.instances.append(this_instance)
+                    self.instances.add(this_instance)
                 else:
                     logging.warning(f"Unable to add '{item}' since it is already there")
                     print(f"Instance '{item}' already in group")
@@ -116,13 +116,10 @@ class InstanceGroup:
                 logging.warning(f"'{item}' is not a valid instance")
                 print(f"Warning : '{item}' is not a valid instance, therefore it will not be added to the group")
 
-    def remove_instances(self, removal_list: Set[str]):
-        if not removal_list:
+    def remove_instances(self, removal_set: Set[str]):
+        if not removal_set:
             logging.warning("No instances specified to remove.")
             return
-        
-        removal_set = set(removal__list)
-        
         
         instances_to_keep = [
             inst for inst in self.instances 
