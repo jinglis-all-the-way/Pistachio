@@ -123,14 +123,14 @@ class InstanceGroup:
         
         instances_to_keep = [
             inst for inst in self.instances 
-            if inst.name not in removal_set and inst.i_id not in removal_set
+            if inst.name not in removal_set and inst.id not in removal_set
         ]
         
         removed_count = len(self.instances) - len(instances_to_keep)
         original_count = len(self.instances)
 
         # Log warnings for items in the removal list that were not found
-        found_names_and_ids = {inst.name for inst in instances_to_keep} | {inst.i_id for inst in instances_to_keep}
+        found_names_and_ids = {inst.name for inst in instances_to_keep} | {inst.id for inst in instances_to_keep}
         for item in removal_set:
             if item not in found_names_and_ids:
                  logging.warning(f"'{item}' not found in instance group and could not be removed.")
