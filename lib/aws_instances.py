@@ -9,8 +9,9 @@ import logging
 from typing import List, Optional, Dict, Any, Set
 
 class AwsInstance:
-    def __init__(self, identifier: str, ec2_client=None):
+    def __init__(self, identifier: str, ec2_client=None, ssm_client=None):
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
+        self.ssm_client = ssm_client if ssm_client is not None else boto3.client('ssm')
         self.identifier = identifier
         self.description = None
         self._is_valid = self._resolve()
@@ -46,6 +47,32 @@ class AwsInstance:
     def is_valid(self) -> bool:
         return self._is_valid
 
+    def is_ready(self) -> bool:
+        """
+        Checks if an instance is in a valid state to receive SSM commands.
+        Returns True if the instance is running AND the SSM agent is online.
+        """
+        # 1. First, check if we have a valid, running EC2 instance.
+        if not self.is_valid or self.description.get('State', {}).get('Name') != 'running':
+            return False
+
+        # 2. If it's running, check the SSM agent's status.
+        try:
+            info = self.ssm_client.describe_instance_information(
+                InstanceInformationFilterList=[{'key': 'InstanceIds', 'valueSet': [self.id]}]
+            )
+            
+            # If the list is empty, SSM doesn't know about this instance.
+            if not info.get('InstanceInformationList'):
+                return False
+            
+            # Check if the first result shows the agent is online.
+            return info['InstanceInformationList'][0].get('PingStatus') == 'Online'
+
+        except ClientError as e:
+            logging.error(f"AWS API error checking SSM status for '{self.id}': {e}")
+            return False
+
     def get_id(self) -> Optional[str]:
         if not self._is_valid or not self.description:
             return None
@@ -72,7 +99,7 @@ class StrippedAwsInstance:
         self.name = None
         self.is_valid = False
 
-        if heavy_instance.is_valid:
+        if heavy_instance.is_valid and heavy_instance.is_ready:
             self.id = heavy_instance.get_id()
             self.name = heavy_instance.get_name()
             self.is_valid = heavy_instance.is_valid
