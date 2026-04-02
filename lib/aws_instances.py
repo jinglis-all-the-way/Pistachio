@@ -104,7 +104,7 @@ class InstanceGroup:
             return
             
         for item in instance_list:
-            this_instance = StrippedAwsInstance(self.ec2_client, item)
+            this_instance = StrippedAwsInstance(ec2_client=self.ec2_client, possible_identifier=item)
             if this_instance.isValid():
                 if this_instance not in self.instances:
                     logging.info(f"Adding instance to group : '{item}'")
