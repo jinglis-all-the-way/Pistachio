@@ -71,7 +71,7 @@ class StrippedAwsInstance:
         self.id = None
         self.name = None
         self.is_valid = False
-        
+
         if heavy_instance.is_valid:
             self.id = heavy_instance.get_id()
             self.name = heavy_instance.get_name()
@@ -100,7 +100,7 @@ class InstanceGroup:
         if not instance_list:
             logging.warning("No instances specified to add")
             return
-            
+        logging.warning(f"{instance_list}")
         for item in instance_list:
             this_instance = StrippedAwsInstance(ec2_client=self.ec2_client, possible_identifier=item)
             if this_instance.is_valid:
