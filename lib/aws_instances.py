@@ -111,7 +111,7 @@ class InstanceGroup:
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
         self.instances: Set[StrippedAwsInstance] = set()
         logging.debug("Created new InstanceGroup object")
-        
+        logging.debug(f"{type(self.instances)}")
         if initial_instances:
             self.add_instances(initial_instances)
 
@@ -123,6 +123,7 @@ class InstanceGroup:
             this_instance = StrippedAwsInstance(ec2_client=self.ec2_client, possible_identifier=item)
             if this_instance.is_valid:
                 if this_instance not in self.instances:
+                    logging.debug(f"{type(self.instances)}")
                     self.instances.add(this_instance)
                     print(f"Added instance '{this_instance.name}' ({this_instance.id}) to group.")
                 else:
