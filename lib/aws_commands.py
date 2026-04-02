@@ -8,7 +8,7 @@ import json
 from botocore.exceptions import ClientError
 import time
 import logging
-from typing import List, Optional, Dict, Any, NoneType 
+from typing import List, Optional, Dict, Any
 
 class CommandHandler:
     def execute_distributable_command(self, command_string: str, target_instances: Dict[str, str]):
