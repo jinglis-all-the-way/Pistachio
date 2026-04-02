@@ -15,8 +15,8 @@ class CommandHandler:
         raise NotImplementedError("This method must be implemented by a subclass.")
 
 class SimpleCommandHandler(CommandHandler):
-    def __init__(self):
-        self.ssm_client = boto3.client('ssm')
+    def __init__(self, ssm_client=None):
+        self.ssm_client = ssm_client if ssm_client is not None else boto3.client('ssm')
 
     def _send_command(self, command: str, instance_ids: List[str]) -> Optional[str]:
         document_name = 'AWS-RunShellScript'
@@ -83,8 +83,8 @@ class SimpleCommandHandler(CommandHandler):
             logging.error(f"Execution failed: no command_id returned for command '{command_string}'.")
 
 class AsyncCommandHandler(CommandHandler):
-    def __init__(self, aio_session):
-        self.session = aio_session
+    def __init__(self, aio_session=None):
+        self.session = aio_session if aio_session is not None else aioboto3.Session()
 
     async def _send_command(self, command: str, instance_ids: List[str]) -> Optional[str]:
         document_name = 'AWS-RunShellScript'
@@ -100,7 +100,15 @@ class AsyncCommandHandler(CommandHandler):
                 print(f"Command '{command}' sent with Command ID: {command_id}. Waiting for output...")
                 return command_id
             except ClientError as e:
-                # ... error handling ...
+                if e.response['Error']['Code'] == 'InvalidInstanceInformation':
+                    logging.error("An invalid instance ID was provided or an instance is not managed by SSM.")
+                else:
+                    logging.error(f"An AWS API error occurred sending command: {e.response['Error']['Message']}")
+                print("Error: Could not send command. Check logs for details.")
+                return None
+            except Exception as e:
+                logging.error(f"An unexpected error occurred sending command: {e}")
+                print("Error: An unexpected error occurred. Check logs for details.")
                 return None
 
     async def _get_single_instance_output(self, command_id: str, instance_id: str) -> Dict[str, Any]:
