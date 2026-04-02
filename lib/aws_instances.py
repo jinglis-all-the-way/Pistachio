@@ -101,7 +101,6 @@ class InstanceGroup:
             logging.warning("No instances specified to add")
             return
         for item in instance_list:
-            logging.warning(f"{item}")
             this_instance = StrippedAwsInstance(ec2_client=self.ec2_client, possible_identifier=item)
             if this_instance.is_valid:
                 if this_instance not in self.instances:
