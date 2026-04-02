@@ -70,16 +70,14 @@ class StrippedAwsInstance:
         
         self.id = None
         self.name = None
+        self.is_valid = False
         
         if heavy_instance.is_valid:
             self.id = heavy_instance.get_id()
             self.name = heavy_instance.get_name()
+            self.is_valid = heavy_instance.is_valid()
 
     @property
-    def is_valid(self) -> bool:
-        """An instance is valid if it has an ID."""
-        return self.id is not None
-
     # --- Essential methods for list/set operations ---
     def __eq__(self, other):
         if not isinstance(other, StrippedAwsInstance):
@@ -105,7 +103,7 @@ class InstanceGroup:
             
         for item in instance_list:
             this_instance = StrippedAwsInstance(ec2_client=self.ec2_client, possible_identifier=item)
-            if this_instance.is_valid():
+            if this_instance.is_valid:
                 if this_instance not in self.instances:
                     logging.info(f"Adding instance to group : '{item}'")
                     self.instances.add(this_instance)
