@@ -99,7 +99,6 @@ class AWSShell:
                 'history': {
                     '_description': 'View and rerun command history.',
                     'list': self._show_history,
-                    'rerun': self._rerun_history,
                 },
                 'group': {
                     '_description': 'Commands for managing the instance group.',
@@ -149,20 +148,6 @@ class AWSShell:
     def _exit_shell(self, *args):
         print("Exiting shell.")
         return 'exit'
-        
-    def _rerun_history(self, *args):
-        self.history = list(self.prompt_session.history.get_strings())
-        if not args:
-            print("Error: Please provide a history number to rerun.")
-            return
-        try:
-            index = int(args[0]) - 1
-            command_to_rerun = self.history[index]
-            print(f"Rerunning command {args[0]}: {command_to_rerun}")
-            self.prompt_session.history.append_string(command_to_rerun)
-            self._handle_command(command_to_rerun)
-        except (ValueError, IndexError):
-            print(f"Error: Please provide a valid history number.")
 
     def _save_group(self, *args):
         if not args:
