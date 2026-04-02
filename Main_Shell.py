@@ -148,7 +148,7 @@ class AWSShell:
             history = self.prompt_session.history
             
             # Clear the in-memory history list
-            history.strings.clear()
+            history.clear()
             
             # Truncate the history file on disk by opening it in write mode
             with open(history.filename, 'w') as f:
@@ -160,6 +160,7 @@ class AWSShell:
         
         except Exception as e:
             print(f"An error occurred while clearing history: {e}")
+
     def _show_targets(self, *args):
         targets = self.instance_group.get_instances()
         if not targets:
