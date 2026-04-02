@@ -25,8 +25,8 @@ class AwsInstance:
             else:
                 response = self.ec2_client.describe_instances(
                     Filters=[
-                        {'Name': 'tag:Name', 'Value': [self.identifier]},
-                        {'Name': 'instance-state-name', 'Value': ['running']}
+                        {'Name': 'tag:Name', 'Values': [self.identifier]},
+                        {'Name': 'instance-state-name', 'Values': ['running']}
                     ]
                 )
             
