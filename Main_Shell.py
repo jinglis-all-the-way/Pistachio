@@ -22,7 +22,7 @@ from prompt_toolkit.document import Document
 # or in Python's path.
 from lib import aws_instances, aws_commands
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class BasePlugin(ABC):
     """Abstract base class defining the contract for all plugins."""
