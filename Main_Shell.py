@@ -78,8 +78,10 @@ class AWSShell:
         self.use_async = use_async
         self.history_filename = 'AWSShell_history.txt'
 
+        self.ec2_client = boto3.ec2_client('ec2')
+
         # Instantiate objects from the AWS library
-        self.instance_group = aws_instances.InstanceGroup(initial_instances=instance_list)
+        self.instance_group = aws_instances.InstanceGroup(ec2_client=self.ec2_client, initial_instances=instance_list)
         self.command_handler = aws_commands.AsyncCommandHandler() if use_async else aws_commands.SimpleCommandHandler()
         
         self.loaded_plugins = {}
