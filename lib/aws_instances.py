@@ -109,7 +109,7 @@ class StrippedAwsInstance:
 class InstanceGroup:
     def __init__(self, ec2_client=None, initial_instances: Optional[List[str]] = None): 
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
-        self.instances: Set[StrippedAwsInstance] = set()
+        self._instances: Set[StrippedAwsInstance] = set()
         logging.debug("Created new InstanceGroup object")
         logging.debug(f"{type(self.instances)}")
         if initial_instances:
@@ -120,7 +120,7 @@ class InstanceGroup:
             logging.warning("No instances specified to add")
             return
 
-        existing_identifiers = {inst.id for inst in self.instances} | {inst.name for inst in self.instances}
+        existing_identifiers = {inst.id for inst in self._instances} | {inst.name for inst in self._instances}
 
         for item in instance_list:
             if item in existing_identifiers:
@@ -134,8 +134,8 @@ class InstanceGroup:
                 # A resolved instance could still be a duplicate if added via a different alias
                 # (e.g., adding by ID when it was already added by name). The set handles this.
                 if instance not in self.instances:
-                    logging.debug(f"{type(self.instances)}")
-                    self.instances.add(instance)
+                    logging.debug(f"{type(self._instances)}")
+                    self._instances.add(instance)
                     # Add the new instance's ID and name to our lookup set for this session
                     existing_identifiers.add(instance.id)
                     existing_identifiers.add(instance.name)
@@ -145,32 +145,22 @@ class InstanceGroup:
             else:
                 print(f"Warning: Could not resolve '{item}' to a valid instance.")
 
-    def remove_instances(self, removal_set: Set[str]):
-        if not removal_set:
-            logging.warning("No instances specified to remove.")
+    def remove_instances(self, removal_list: List[str]):
+        if not removal_list: return
+        removal_set = set(removal_list)
+        
+        # Use the renamed attribute
+        instances_to_remove = {inst for inst in self._instances if inst.name in removal_set or inst.id in removal_set}
+        
+        if not instances_to_remove:
+            print("No matching instances found in the group to remove.")
             return
-        
-        instances_to_keep = [
-            inst for inst in self.instances 
-            if inst.name not in removal_set and inst.id not in removal_set
-        ]
-        
-        removed_count = len(self.instances) - len(instances_to_keep)
-        original_count = len(self.instances)
 
-        # Log warnings for items in the removal list that were not found
-        found_names_and_ids = {inst.name for inst in instances_to_keep} | {inst.id for inst in instances_to_keep}
-        for item in removal_set:
-            if item not in found_names_and_ids:
-                 logging.warning(f"'{item}' not found in instance group and could not be removed.")
-                 print(f"'{item}' is not part of this group")
-
-        logging.info(f"Removed {removed_count} instances. Original count: {original_count}, New count: {len(instances_to_keep)}.")
-        print(f"Removed {removed_count} instances from the group.")
-        
-        self.instances = instances_to_keep
+        # Use the renamed attribute
+        self._instances -= instances_to_remove
+        print(f"Removed {len(instances_to_remove)} instance(s).")
                 
 
     def get_instances(self) -> Dict[str, str]:
-        return {inst.id: inst.name for inst in self.instances if inst.id}
+        return {inst.id: inst.name for inst in self._instances if inst.id}
            
