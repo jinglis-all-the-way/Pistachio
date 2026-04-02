@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+import boto3
 import json
 import logging
 import importlib
