@@ -90,7 +90,7 @@ class StrippedAwsInstance:
 class InstanceGroup:
     def __init__(self, ec2_client=None, initial_instances: Optional[List[str]] = None): 
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
-        self.instances = set()
+        self.instances: Set[StrippedAwsInstance] = set()
         logging.debug("Created new InstanceGroup object")
         
         if initial_instances:
