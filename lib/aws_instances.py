@@ -119,20 +119,30 @@ class InstanceGroup:
         if not instance_list:
             logging.warning("No instances specified to add")
             return
+
+        existing_identifiers = {inst.id for inst in self.instances} | {inst.name for inst in self.instances}
+
         for item in instance_list:
-            this_instance = StrippedAwsInstance(ec2_client=self.ec2_client, possible_identifier=item)
-            if this_instance.is_valid:
-                found_names_and_ids = {inst.name for inst in instances_to_keep} | {inst.id for inst in instances_to_keep}
-                if this_instance not in found_names_and_ids:
-                    logging.debug(f"{type(self.instances)}")
-                    self.instances.add(this_instance)
-                    print(f"Added instance '{this_instance.name}' ({this_instance.id}) to group.")
+            if item in existing_identifiers:
+                print(f"Instance '{item}' is already in the group.")
+                continue # Skip to the next item in the list
+
+            # If not already present, try to resolve the new instance.
+            instance = StrippedAwsInstance(possible_identifier=item, ec2_client=self.ec2_client)
+            
+            if instance.is_valid:
+                # A resolved instance could still be a duplicate if added via a different alias
+                # (e.g., adding by ID when it was already added by name). The set handles this.
+                if instance not in self.instances:
+                    self.instances.add(instance)
+                    # Add the new instance's ID and name to our lookup set for this session
+                    existing_identifiers.add(instance.id)
+                    existing_identifiers.add(instance.name)
+                    print(f"Added instance '{instance.name}' ({instance.id}) to group.")
                 else:
-                    logging.warning(f"Unable to add '{item}' since it is already there")
-                    print(f"Instance '{item}' already in group")
+                    print(f"Instance '{item}' is already in the group (added via a different name/ID).")
             else:
-                logging.warning(f"'{item}' is not a valid instance")
-                print(f"Warning : '{item}' is not a valid instance, therefore it will not be added to the group")
+                print(f"Warning: Could not resolve '{item}' to a valid instance.")
 
     def remove_instances(self, removal_set: Set[str]):
         if not removal_set:
