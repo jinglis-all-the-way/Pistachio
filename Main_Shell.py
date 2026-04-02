@@ -114,7 +114,7 @@ class AWSShell:
             }
         }
         
-        completer = WebShellCompleter(self.commands)
+        completer = AWSShellCompleter(self.commands)
         self.prompt_session = PromptSession(
             history=FileHistory('shell_history.txt'),
             completer=completer,
