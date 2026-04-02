@@ -53,6 +53,7 @@ class AwsInstance:
         Checks if an instance is in a valid state to receive SSM commands.
         Returns True if the instance is running AND the SSM agent is online.
         """
+        instance_id = self.get_id()
         # 1. First, check if we have a valid, running EC2 instance.
         if not self.is_valid or self.description.get('State', {}).get('Name') != 'running':
             return False
@@ -60,7 +61,7 @@ class AwsInstance:
         # 2. If it's running, check the SSM agent's status.
         try:
             info = self.ssm_client.describe_instance_information(
-                InstanceInformationFilterList=[{'key': 'InstanceIds', 'valueSet': [self.id]}]
+                InstanceInformationFilterList=[{'key': 'InstanceIds', 'valueSet': [instance_id]}]
             )
             
             # If the list is empty, SSM doesn't know about this instance.
@@ -105,7 +106,7 @@ class StrippedAwsInstance:
             self.name = heavy_instance.get_name()
             self.is_valid = heavy_instance.is_valid
 
-    @property
+    
     # --- Essential methods for list/set operations ---
     def __eq__(self, other):
         if not isinstance(other, StrippedAwsInstance):
