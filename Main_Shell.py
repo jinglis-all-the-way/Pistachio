@@ -103,7 +103,7 @@ class AWSShell:
                 },
                 'group': {
                     '_description': 'Commands for managing the instance group.',
-                    'list': lambda *args: self._list_sub_commands(self.commands['group'], *args),
+                    'list': lambda *args: self._list_sub_commands(self.commands['shell']['group'], *args),
                     'add': self.instance_group.add_instances,
                     'remove': self.instance_group.remove_instances,
                     'show': self._show_targets,
