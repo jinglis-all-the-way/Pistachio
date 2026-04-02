@@ -282,8 +282,8 @@ class AWSShell:
         except Exception as e:
             print(f"An unexpected error occurred while unloading plugin '{plugin_name}': {e}")
 
-    def _handle_command(self, command_string: str):
-        parts = command_string.strip().split()
+    def _handle_input(self, input_string: str):
+        parts = input_string.strip().split()
         if not parts: return
 
         current_node = self.commands
@@ -299,14 +299,17 @@ class AWSShell:
                         return
             else:
                 print(f"'{part}' is not a recognized internal command. Attempting to execute on remote instances...")
-                targets = self.instance_group.get_instances()
-                if self.use_async:
-                    asyncio.run(self.command_handler.execute_distributable_command(command_string, targets))
-                else:
-                    self.command_handler.execute_distributable_command(command_string, targets)
+                self._handle_command(input_string)
                 return
         
-        print(f"Invalid command: '{command_string}'")
+        print(f"Invalid command: '{input_string}'")
+
+    def _handle_command(self, command_string):
+        targets = self.instance_group.get_instances()
+        if self.use_async:
+            asyncio.run(self.command_handler.execute_distributable_command(command_string, targets))
+        else:
+            self.command_handler.execute_distributable_command(command_string, targets)
 
     def start(self):
         mode = "Asynchronous" if self.use_async else "Simplex"
@@ -316,7 +319,7 @@ class AWSShell:
             try:
                 cmd_input = self.prompt_session.prompt("\n>> ")
                 if not cmd_input.strip(): continue
-                if self._handle_command(cmd_input) == 'exit':
+                if self._handle_input(cmd_input) == 'exit':
                     break
             except (KeyboardInterrupt, EOFError):
                 print("\nExiting shell.")
