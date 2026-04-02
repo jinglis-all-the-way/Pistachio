@@ -322,7 +322,7 @@ def cli():
     parser.add_argument('--instances', nargs='*', help="Initial instance IDs or names.")
     args = parser.parse_args()
     
-    shell = AWSShell(instance_list=args.instances, use_async=(args.mode == 'async'))
+    shell = AWSShell(instance_list=args.instances, use_async=(args.mode == 'sync'))
     shell.start()
 
 if __name__ == "__main__":
