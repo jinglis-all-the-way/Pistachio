@@ -19,8 +19,7 @@ from prompt_toolkit.document import Document
 # --- Import all AWS logic from your library ---
 # This assumes you have a file named 'aws_lib.py' in the same directory
 # or in Python's path.
-from aws_instances import InstanceGroup
-from aws_commands import SimpleCommandHandler, AsyncCommandHandler
+from lib import aws_instances, aws_commands
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -79,8 +78,8 @@ class AWSShell:
         self.use_async = use_async
         
         # Instantiate objects from the AWS library
-        self.instance_group = InstanceGroup(initial_instances=instance_list)
-        self.command_handler = AsyncCommandHandler() if use_async else SimpleCommandHandler()
+        self.instance_group = aws_instances.InstanceGroup(initial_instances=instance_list)
+        self.command_handler = aws_commands.AsyncCommandHandler() if use_async else aws_commands.SimpleCommandHandler()
         
         self.loaded_plugins = {}
         
