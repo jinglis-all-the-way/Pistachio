@@ -66,7 +66,7 @@ class AwsInstance:
 class StrippedAwsInstance:
     def __init__(self, identifier: str, ec2_client=None):
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
-        heavy_instance = AwsInstance(identifier, ec2_client)
+        heavy_instance = AwsInstance(identifier=identifier, ec2_client=self.ec2_client)
         
         self.id = None
         self.name = None
