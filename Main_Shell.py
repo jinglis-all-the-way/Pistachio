@@ -99,6 +99,7 @@ class AWSShell:
                 'history': {
                     '_description': 'View and rerun command history.',
                     'show': self._show_history,
+                    'clear': self._clear_history,
                 },
                 'group': {
                     '_description': 'Commands for managing the instance group.',
@@ -136,6 +137,29 @@ class AWSShell:
         for i, cmd in enumerate(self.history, 1):
             print(f"{i: >3}: {cmd}")
 
+    def _clear_history(self, *args):
+        # It's good practice to ask for confirmation for destructive actions
+        confirm = input("Are you sure you want to permanently clear all command history? [y/N]: ")
+        if confirm.lower() != 'y':
+            print("History clear aborted.")
+            return
+
+        try:
+            history = self.prompt_session.history
+            
+            # Clear the in-memory history list
+            history.strings.clear()
+            
+            # Truncate the history file on disk by opening it in write mode
+            with open(history.filename, 'w') as f:
+                pass  # Opening in 'w' mode and closing is enough to clear it
+            
+            self.history.clear()
+            
+            print("Command history has been cleared.")
+        
+        except Exception as e:
+            print(f"An error occurred while clearing history: {e}")
     def _show_targets(self, *args):
         targets = self.instance_group.get_instances()
         if not targets:
