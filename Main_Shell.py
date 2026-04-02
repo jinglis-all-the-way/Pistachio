@@ -85,7 +85,7 @@ class AWSShell:
         
         # Define the command structure for the shell
         self.commands = {
-            'list': self._show_top_level_commands,
+            'list': lambda *args: self._list_sub_commands(self.commands, *args),
             'exit': self._exit_shell, 'quit': self._exit_shell,
             'plugin': {
                 '_description': 'Manage shell plugins.',
