@@ -104,7 +104,9 @@ class InstanceGroup:
             this_instance = StrippedAwsInstance(ec2_client=self.ec2_client, possible_identifier=item)
             if this_instance.is_valid:
                 initial_size = len(self.instances)
+                logging.warning(f"{initial_size}")
                 self.instances.add(this_instance)
+                logging.warning(f"{len(self.instances)}")
                 # If the size of the set increased, a new element was added.
                 if len(self.instances) > initial_size:
                     logging.info(f"Adding instance to group : '{item}'")
