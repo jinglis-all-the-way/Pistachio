@@ -109,7 +109,6 @@ class AWSShell:
                     'show': self._show_targets,
                     'save': self._save_group,
                     'load': self._load_group,
-                    'describe': self._describe_instance,
                 }
             }
         }
@@ -121,10 +120,6 @@ class AWSShell:
             complete_while_typing=True
         )
         self.history = list(self.prompt_session.history.get_strings())
-
-    def _show_top_level_commands(self, *args):
-        print("Available top-level command namespaces:")
-        self._list_sub_commands(self.commands)
 
     def _list_sub_commands(self, command_node, *args):
         print("Available commands:")
