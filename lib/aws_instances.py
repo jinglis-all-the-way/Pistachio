@@ -82,8 +82,18 @@ class StrippedAwsInstance:
     def __eq__(self, other):
         if not isinstance(other, StrippedAwsInstance):
             return NotImplemented
-        return self.id is not None and self.id == other.id
-
+        
+        # If both instances are valid, compare their IDs.
+        if self.is_valid and other.is_valid:
+            return self.id == other.id
+        
+        # If both instances are invalid, they are considered equal.
+        if not self.is_valid and not other.is_valid:
+            return True
+            
+        # If one is valid and the other is not, they are not equal.
+        return False
+        
     def __hash__(self):
         return hash(self.id)
             
