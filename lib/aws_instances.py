@@ -46,13 +46,13 @@ class AwsInstance:
     def is_valid(self) -> bool:
         return self._is_valid
 
-    def get_id(self) -> str | None:
+    def get_id(self) -> Optional[str]:
         if not self._is_valid or not self.description:
             return None
             
         return self.description.get('InstanceId')
 
-    def get_name(self) -> str | None:
+    def get_name(self) -> Optional[str]:
         if not self._is_valid or not self.description:
             return None
         
