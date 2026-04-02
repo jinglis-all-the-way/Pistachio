@@ -74,7 +74,7 @@ class AWSShell:
     The main application class, responsible for the shell UI, command parsing,
     and plugin management. It contains no direct AWS logic.
     """
-    def __init__(self, instance_list: Optional[List[str]] = None, use_async: bool = FalseS):
+    def __init__(self, instance_list: Optional[List[str]] = None, use_async: bool = False):
         self.use_async = use_async
         
         # Instantiate objects from the AWS library
