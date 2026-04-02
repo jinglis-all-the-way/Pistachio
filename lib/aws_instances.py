@@ -75,7 +75,7 @@ class StrippedAwsInstance:
         if heavy_instance.is_valid:
             self.id = heavy_instance.get_id()
             self.name = heavy_instance.get_name()
-            self.is_valid = heavy_instance.is_valid()
+            self.is_valid = heavy_instance.is_valid
 
     @property
     # --- Essential methods for list/set operations ---
