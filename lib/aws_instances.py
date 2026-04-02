@@ -47,6 +47,7 @@ class AwsInstance:
     def is_valid(self) -> bool:
         return self._is_valid
 
+    @property
     def is_ready(self) -> bool:
         """
         Checks if an instance is in a valid state to receive SSM commands.
