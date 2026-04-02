@@ -283,47 +283,47 @@ class AWSShell:
             print(f"An unexpected error occurred while unloading plugin '{plugin_name}': {e}")
 
     def _handle_input(self, input_string: str):
-    """
-    Parses user input. If the first word is a known command, it's handled
-    internally. Otherwise, the entire string is treated as a remote command.
-    """
-    parts = input_string.strip().split()
-    if not parts:
-        return
-
-    command = parts[0]
-
-    # STAGE 1: Check if the first word is a known internal command.
-    if command in self.commands:
-        # It's an internal command. Proceed to parse its arguments and sub-commands.
-        current_node = self.commands[command]
-        
-        # Loop through the rest of the parts (the sub-commands and arguments)
-        for i, part in enumerate(parts[1:], 1): # Start from the second word
-            if isinstance(current_node, dict) and part in current_node:
-                current_node = current_node[part]
-            else:
-                # This happens if a valid function is followed by extra arguments.
-                # e.g., "webshell group add my-instance-name"
-                if callable(current_node):
-                    return current_node(*parts[i:])
-                else:
-                    print(f"Invalid sub-command: '{part}' for command '{' '.join(parts[:i])}'")
-                    return
-
-        # After the loop, handle the final node
-        if callable(current_node):
-            return current_node() # Call function with no arguments
-        elif isinstance(current_node, dict):
-            print(f"Sub-commands for '{command}':")
-            self._list_sub_commands(current_node)
+        """
+        Parses user input. If the first word is a known command, it's handled
+        internally. Otherwise, the entire string is treated as a remote command.
+        """
+        parts = input_string.strip().split()
+        if not parts:
             return
 
-    # STAGE 2: If the first word was not in the command tree, treat it as a remote command.
-    else:
-        print(f"'{command}' is not a recognized internal command. Attempting to execute on remote instances...")
-        self._handle_command(input_string)
-        return
+        command = parts[0]
+
+        # STAGE 1: Check if the first word is a known internal command.
+        if command in self.commands:
+            # It's an internal command. Proceed to parse its arguments and sub-commands.
+            current_node = self.commands[command]
+            
+            # Loop through the rest of the parts (the sub-commands and arguments)
+            for i, part in enumerate(parts[1:], 1): # Start from the second word
+                if isinstance(current_node, dict) and part in current_node:
+                    current_node = current_node[part]
+                else:
+                    # This happens if a valid function is followed by extra arguments.
+                    # e.g., "webshell group add my-instance-name"
+                    if callable(current_node):
+                        return current_node(*parts[i:])
+                    else:
+                        print(f"Invalid sub-command: '{part}' for command '{' '.join(parts[:i])}'")
+                        return
+
+            # After the loop, handle the final node
+            if callable(current_node):
+                return current_node() # Call function with no arguments
+            elif isinstance(current_node, dict):
+                print(f"Sub-commands for '{command}':")
+                self._list_sub_commands(current_node)
+                return
+
+        # STAGE 2: If the first word was not in the command tree, treat it as a remote command.
+        else:
+            print(f"'{command}' is not a recognized internal command. Attempting to execute on remote instances...")
+            self._handle_command(input_string)
+            return
 
     def _handle_command(self, command_string):
         targets = self.instance_group.get_instances()
