@@ -145,19 +145,26 @@ class AWSShell:
             return
 
         try:
+            # Get the filename from the current history object
             history = self.prompt_session.history
+            if history is None or not hasattr(history, 'filename'):
+                print("Error: No history file is configured.")
+                return
+                
+            history_filename = history.filename
             
-            # Clear the in-memory history list
-            history.clear()
+            # 1. Truncate the history file
+            with open(history_filename, 'w') as f:
+                pass
             
-            # Truncate the history file on disk by opening it in write mode
-            with open(history.filename, 'w') as f:
-                pass  # Opening in 'w' mode and closing is enough to clear it
+            # 2. Create a new, empty FileHistory object and replace the old one
+            self.prompt_session.history = FileHistory(history_filename)
             
+            # Clear internal history
             self.history.clear()
             
             print("Command history has been cleared.")
-        
+    
         except Exception as e:
             print(f"An error occurred while clearing history: {e}")
 
