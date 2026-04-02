@@ -95,7 +95,7 @@ class AWSShell:
             },
             'shell': {
                 '_description': 'Commands related to the shell session itself.',
-                'list': self._list_sub_commands(self.commands.get(shell)),
+                'list': lambda *args: self._list_sub_commands(self.commands['shell'], *args),
                 'history': {
                     '_description': 'View and rerun command history.',
                     'list': self._show_history,
