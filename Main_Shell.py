@@ -98,7 +98,7 @@ class AWSShell:
                 'list': lambda *args: self._list_sub_commands(self.commands['shell'], *args),
                 'history': {
                     '_description': 'View and rerun command history.',
-                    'list': self._show_history,
+                    'show': self._show_history,
                 },
                 'group': {
                     '_description': 'Commands for managing the instance group.',
