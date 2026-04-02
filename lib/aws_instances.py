@@ -140,5 +140,5 @@ class InstanceGroup:
                 
 
     def get_instances(self) -> Dict[str, str]:
-        return self.instances
+        return {inst.id: inst.name for inst in self.instances if inst.id}
            
