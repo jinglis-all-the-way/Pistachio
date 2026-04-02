@@ -1,4 +1,4 @@
-# webshell.py
+# shell.py
 
 import argparse
 import asyncio
@@ -93,7 +93,7 @@ class AWSShell:
                 'load': self._load_plugin,
                 'unload': self._unload_plugin,
             },
-            'webshell': {
+            'shell': {
                 '_description': 'Commands related to the shell session itself.',
                 'list': self._list_sub_commands,
                 'history': {
@@ -171,7 +171,7 @@ class AWSShell:
 
     def _save_group(self, *args):
         if not args:
-            print("Error: Please provide a filename. Usage: webshell group save <filename>")
+            print("Error: Please provide a filename. Usage: shell group save <filename>")
             return
         filename = args[0] if args[0].endswith('.json') else f"{args[0]}.json"
         try:
@@ -184,7 +184,7 @@ class AWSShell:
 
     def _load_group(self, *args):
         if not args:
-            print("Error: Please provide a filename. Usage: webshell group load <filename>")
+            print("Error: Please provide a filename. Usage: shell group load <filename>")
             return
         filename = args[0] if args[0].endswith('.json') else f"{args[0]}.json"
         try:
