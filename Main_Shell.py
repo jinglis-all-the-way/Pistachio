@@ -36,7 +36,7 @@ class BasePlugin(ABC):
     def commands(self) -> dict:
         pass
 
-class WebShellCompleter(Completer):
+class AWSShellCompleter(Completer):
     """Handles contextual command auto-completion."""
     def __init__(self, command_tree: Dict[str, Any]):
         self.command_tree = command_tree
@@ -70,7 +70,7 @@ class WebShellCompleter(Completer):
                     )
 
 
-class ShellWrapper:
+class AWSShell:
     """
     The main application class, responsible for the shell UI, command parsing,
     and plugin management. It contains no direct AWS logic.
@@ -323,7 +323,7 @@ def cli():
     parser.add_argument('--instances', nargs='*', help="Initial instance IDs or names.")
     args = parser.parse_args()
     
-    shell = WebShell(instance_list=args.instances, use_async=(args.mode == 'async'))
+    shell = AWSShell(instance_list=args.instances, use_async=(args.mode == 'async'))
     shell.start()
 
 if __name__ == "__main__":
