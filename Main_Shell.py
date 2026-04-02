@@ -119,7 +119,7 @@ class AWSShell:
 
     def _create_prompt_session(self) -> PromptSession:
         """Creates and configures the PromptSession object."""
-        completer = WebShellCompleter(self.commands)
+        completer = AWSShellCompleter(self.commands)
         return PromptSession(
             history=FileHistory(self.history_filename),
             completer=completer,
