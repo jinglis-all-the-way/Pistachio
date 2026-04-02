@@ -76,7 +76,8 @@ class AWSShell:
     """
     def __init__(self, instance_list: Optional[List[str]] = None, use_async: bool = False):
         self.use_async = use_async
-        
+        self.history_filename = 'AWSShell_history.txt'
+
         # Instantiate objects from the AWS library
         self.instance_group = aws_instances.InstanceGroup(initial_instances=instance_list)
         self.command_handler = aws_commands.AsyncCommandHandler() if use_async else aws_commands.SimpleCommandHandler()
@@ -113,13 +114,17 @@ class AWSShell:
             }
         }
         
-        completer = AWSShellCompleter(self.commands)
-        self.prompt_session = PromptSession(
-            history=FileHistory('shell_history.txt'),
+        self.prompt_session = self._create_prompt_session()
+        self.history = list(self.prompt_session.history.get_strings())
+
+    def _create_prompt_session(self) -> PromptSession:
+        """Creates and configures the PromptSession object."""
+        completer = WebShellCompleter(self.commands)
+        return PromptSession(
+            history=FileHistory(self.history_filename),
             completer=completer,
             complete_while_typing=True
         )
-        self.history = list(self.prompt_session.history.get_strings())
 
     def _list_sub_commands(self, command_node, *args):
         print("Available commands:")
@@ -145,22 +150,13 @@ class AWSShell:
             return
 
         try:
-            # Get the filename from the current history object
-            history = self.prompt_session.history
-            if history is None or not hasattr(history, 'filename'):
-                print("Error: No history file is configured.")
-                return
-                
-            history_filename = history.filename
-            
-            # 1. Truncate the history file
-            with open(history_filename, 'w') as f:
+            # Truncate the history file using the class attribute
+            with open(self.history_filename, 'w') as f:
                 pass
             
-            # 2. Create a new, empty FileHistory object and replace the old one
-            self.prompt_session.history = FileHistory(history_filename)
+            # Re-create the session, which will implicitly use the same filename
+            self.prompt_session = self._create_prompt_session()
             
-            # Clear internal history
             self.history.clear()
             
             print("Command history has been cleared.")
