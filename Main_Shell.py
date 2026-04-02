@@ -307,9 +307,9 @@ class AWSShell:
                     current_node = current_node[part]
                 else:
                     # This happens if a valid function is followed by extra arguments.
-                    # e.g., "webshell group add my-instance-name"
+                    # e.g., "shell group add my-instance-name"
                     if callable(current_node):
-                        return current_node(*parts[i:])
+                        return current_node(parts[i:])
                     else:
                         print(f"Invalid sub-command: '{part}' for command '{' '.join(parts[:i])}'")
                         return
