@@ -122,7 +122,8 @@ class InstanceGroup:
         for item in instance_list:
             this_instance = StrippedAwsInstance(ec2_client=self.ec2_client, possible_identifier=item)
             if this_instance.is_valid:
-                if this_instance not in self.instances:
+                found_names_and_ids = {inst.name for inst in instances_to_keep} | {inst.id for inst in instances_to_keep}
+                if this_instance not in found_names_and_ids:
                     logging.debug(f"{type(self.instances)}")
                     self.instances.add(this_instance)
                     print(f"Added instance '{this_instance.name}' ({this_instance.id}) to group.")
