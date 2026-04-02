@@ -8,7 +8,7 @@ import json
 from botocore.exceptions import ClientError
 import time
 import logging
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, NoneType 
 
 class CommandHandler:
     def execute_distributable_command(self, command_string: str, target_instances: Dict[str, str]):
@@ -31,10 +31,15 @@ class SimpleCommandHandler(CommandHandler):
             print(f"Command '{command}' sent with Command ID: {command_id}")
             return command_id
         except ClientError as e:
-            # ... error handling ...
+            if e.response['Error']['Code'] == 'InvalidInstanceInformation':
+                logging.error("An invalid instance ID was provided or an instance is not managed by SSM.")
+            else:
+                logging.error(f"An AWS API error occurred sending command: {e.response['Error']['Message']}")
+            print("Error: Could not send command. Check logs for details.")
             return None
         except Exception as e:
-            # ... error handling ...
+            logging.error(f"An unexpected error occurred sending command: {e}")
+            print("Error: An unexpected error occurred. Check logs for details.")
             return None
 
     def _get_command_output(self, command_id: str, target_instances: Dict[str, str]):
