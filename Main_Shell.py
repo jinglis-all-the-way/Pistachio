@@ -37,7 +37,7 @@ class BasePlugin(ABC):
     def commands(self) -> dict:
         pass
 
-class AWSShellCompleter(Completer):
+class AWSInteractiveShellCompleter(Completer):
     """Handles contextual command auto-completion."""
     def __init__(self, command_tree: Dict[str, Any]):
         self.command_tree = command_tree
@@ -71,14 +71,14 @@ class AWSShellCompleter(Completer):
                     )
 
 
-class AWSShell:
+class AWSInteractiveShell:
     """
     The main application class, responsible for the shell UI, command parsing,
     and plugin management. It contains no direct AWS logic.
     """
     def __init__(self, instance_list: Optional[List[str]] = None, use_async: bool = False):
         self.use_async = use_async
-        self.history_filename = 'AWSShell_history.txt'
+        self.history_filename = 'AWSInteractiveShell_history.txt'
 
         self.ec2_client = boto3.client('ec2')
                         
@@ -123,7 +123,7 @@ class AWSShell:
 
     def _create_prompt_session(self) -> PromptSession:
         """Creates and configures the PromptSession object."""
-        completer = AWSShellCompleter(self.commands)
+        completer = AWSInteractiveShellCompleter(self.commands)
         return PromptSession(
             history=FileHistory(self.history_filename),
             completer=completer,
@@ -358,7 +358,7 @@ def cli():
     parser.add_argument('--instances', nargs='*', help="Initial instance IDs or names.")
     args = parser.parse_args()
     
-    shell = AWSShell(instance_list=args.instances, use_async=(args.mode == 'sync'))
+    shell = AWSInteractiveShell(instance_list=args.instances, use_async=(args.mode == 'sync'))
     shell.start()
 
 if __name__ == "__main__":
