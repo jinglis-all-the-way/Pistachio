@@ -94,7 +94,7 @@ class TacoShell:
 
     def _create_prompt_session(self) -> PromptSession:
         """Creates and configures the PromptSession object."""
-        completer = AWSInteractiveShellCompleter(self.commands)
+        completer = TacoShellCompleter(self.commands)
         return PromptSession(
             history=FileHistory(self.history_filename),
             completer=completer,
