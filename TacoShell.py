@@ -201,11 +201,6 @@ class TacoShell:
             print(f"Unregistered default command handler from plugin '{plugin_name}'.")
 
     def _handle_input(self, input_string: str):
-        def _handle_input(self, input_string: str):
-        """
-        Parses user input. If the first word is a known command, it's handled
-        internally. Otherwise, the entire string is treated as a remote command.
-        """
         parts = input_string.strip().split()
         if not parts:
             return
