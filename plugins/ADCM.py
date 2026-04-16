@@ -1,7 +1,5 @@
 import argparse
-import asyncio
 import boto3
-import aioboto3
 from typing import List
 
 # Import all your existing, correct AWS data classes
@@ -27,10 +25,8 @@ class AWSPlugin:
         """
         self._shell.poutput(f"'{statement.split()[0]}' is not a built-in command. Passing to AWS command handler...")
         targets = self._instance_group.get_instances()
-        if self._use_async:
-            asyncio.run(self._command_handler.execute_distributable_command(statement, targets))
-        else:
-            self._command_handler.execute_distributable_command(statement, targets)
+        
+        self._command_handler.execute_distributable_command(statement, targets)
 
     # --- 'group' Sub-commands ---
     
