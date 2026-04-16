@@ -3,8 +3,8 @@ import boto3
 from typing import List
 
 from plugin_interface import BasePlugin
-from aws_instances import InstanceGroup
-from aws_commands import SimpleCommandHandler
+from lib.aws_instances import InstanceGroup
+from lib.aws_commands import SimpleCommandHandler
 
 class AWSPlugin(BasePlugin):
     """
