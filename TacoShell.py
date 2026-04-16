@@ -135,6 +135,8 @@ class TacoShell:
             self.history.clear()
             
             print("Command history has been cleared.")
+        except Exception as e:
+            print(f"An error occurred while clearing history: {e}")
 
     def _exit_shell(self, *args):
         print("Exiting shell.")
