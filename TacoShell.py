@@ -8,37 +8,36 @@ from abc import ABC, abstractmethod
 class BasePlugin(ABC):
     """The contract for all plugins."""
     def __init__(self, **kwargs):
-        """Plugins can accept arbitrary keyword arguments for configuration."""
-        pass
+        self._shell = None
     
     @property
-    @abstractmethod
-    def name(self) -> str:
-        pass
+    def name(self) -> str: pass
 
     @property
-    @abstractmethod
-    def commands(self) -> dict:
-        pass
-
+    def commands(self) -> dict: pass
+    
     def default(self, statement: str):
-        """Optional: A fallback method for commands not handled by the shell."""
-        # This is now defined in the base class, so plugins don't have to.
-        # The main shell will print the error if no plugin overrides this.
-        pass
+        """Plugins can override this method to act as a fallback command handler."""
+        pass # The base implementation does nothing.
 
 class TacoShell(cmd2.Cmd):
-    """
-    A generic, plugin-driven interactive shell framework.
-    """
-    def __init__(self):
+    """A generic, multi-plugin interactive shell framework powered by cmd2."""
+    
+    def __init__(self, plugin_args=None):
         super().__init__(allow_cli_args=False)
         self.prompt = ">> "
-        self.intro = "Taco Interactive Shell. Type 'help' or 'plugin_load <plugin_name>'."
+        self.intro = "Taco Shell Framework. Type 'help' or 'plugin_load <plugin_name>'."
         
-        # This will hold the single, active plugin that provides a default handler
-        self.active_plugin = None
+        # Hide built-in cmd2 commands we don't need
         self.hidden_commands.extend(['alias', 'macro', 'run_script', 'run_pyscript', 'edit', '_relative_run_script'])
+        
+        # --- State for managing multiple plugins ---
+        self.loaded_plugins = {}
+        self.default_handler_plugin = None
+
+        # If plugin arguments were passed at startup, load the plugin immediately
+        if plugin_args and plugin_args.plugin_name:
+            self.do_plugin_load(plugin_args)
 
     # --- Plugin Management Commands ---
     
@@ -48,38 +47,67 @@ class TacoShell(cmd2.Cmd):
 
     @cmd2.with_argparser(plugin_parser)
     def do_plugin_load(self, args: argparse.Namespace):
-        """Loads a plugin and registers its commands and default handler."""
-        if self.active_plugin is not None:
-            self.poutput(f"A plugin ('{self.active_plugin.name}') is already loaded. Please unload it first.")
+        """Loads a plugin, its commands, and optionally its default handler."""
+        if args.plugin_name in self.loaded_plugins:
+            self.poutput(f"Error: Plugin '{args.plugin_name}' is already loaded.")
             return
             
         try:
             module = importlib.import_module(f"plugins.{args.plugin_name}")
-            
-            # Find the first class in the module that is a subclass of BasePlugin
             for name, obj in inspect.getmembers(module, inspect.isclass):
                 if issubclass(obj, BasePlugin) and obj is not BasePlugin:
                     plugin_class = obj
                     
-                    # Parse the key-value arguments for the plugin
                     plugin_kwargs = self._parse_plugin_args(args.plugin_args)
+                    plugin_instance = plugin_class(**plugin_kwargs)
                     
-                    # Instantiate the plugin with its specific arguments
-                    self.active_plugin = plugin_class(**plugin_kwargs)
-                    
-                    # Register the plugin's commands and default handler with cmd2
-                    self.register_mixin(self.active_plugin)
-                    self.default = self.active_plugin.default
-                    
-                    self.poutput(f"Successfully loaded and registered plugin: '{self.active_plugin.name}'.")
+                    # Check if this plugin wants to be the default handler
+                    is_default_handler = plugin_instance.default != BasePlugin.default
+                    if is_default_handler and self.default_handler_plugin is not None:
+                        self.poutput(f"Error: Cannot load '{plugin_instance.name}' because another plugin ('{self.default_handler_plugin}') has already registered a default command handler.")
+                        return
+
+                    # Register commands and store the instance
+                    self.register_mixin(plugin_instance)
+                    self.loaded_plugins[plugin_instance.name] = plugin_instance
+                    self.poutput(f"Successfully loaded plugin '{plugin_instance.name}'.")
+
+                    # If it's a default handler, register it
+                    if is_default_handler:
+                        self.default = plugin_instance.default
+                        self.default_handler_plugin = plugin_instance.name
+                        self.poutput(f"Plugin '{plugin_instance.name}' has registered as the default command handler.")
                     return
             
             self.poutput(f"Error: No valid plugin class found in '{args.plugin_name}'.")
-
         except ImportError:
-            self.poutput(f"Error: Plugin '{args.plugin_name}' not found in 'plugins/' directory.")
+            self.poutput(f"Error: Plugin '{args.plugin_name}' not found.")
         except Exception as e:
-            self.poutput(f"An unexpected error occurred while loading plugin: {e}")
+            self.poutput(f"An unexpected error occurred: {e}")
+
+    unload_parser = argparse.ArgumentParser()
+    unload_parser.add_argument('plugin_name', help='The name of the plugin to unload.')
+
+    @cmd2.with_argparser(unload_parser)
+    def do_plugin_unload(self, args: argparse.Namespace):
+        """Unloads a plugin, removing its commands and default handler."""
+        if args.plugin_name not in self.loaded_plugins:
+            self.poutput(f"Error: Plugin '{args.plugin_name}' is not currently loaded.")
+            return
+
+        plugin_instance = self.loaded_plugins[args.plugin_name]
+        
+        # Unregister the mixin to remove its commands
+        self.unregister_mixin(plugin_instance)
+        
+        # If this plugin was the default handler, reset the shell's default
+        if self.default_handler_plugin == args.plugin_name:
+            self.default = super().default
+            self.default_handler_plugin = None
+            self.poutput(f"Unregistered default command handler from plugin '{args.plugin_name}'.")
+
+        del self.loaded_plugins[args.plugin_name]
+        self.poutput(f"Plugin '{args.plugin_name}' unloaded successfully.")
 
     def _parse_plugin_args(self, arg_list: list) -> dict:
         """A simple key-value parser for plugin arguments like --key value."""
@@ -100,15 +128,22 @@ class TacoShell(cmd2.Cmd):
                 i += 1
         return kwargs
 
-    def default(self, statement: str):
-        """The shell's own default, for when no plugin is loaded."""
-        self.poutput(f"Error: Command '{statement.split()[0]}' not found. No default handler plugin is loaded.")
+        
+
+    def default(self, statement: cmd2.Statement):
+        """The shell's own default handler, for when no plugin is loaded."""
+        self.poutput(f"Error: Command '{statement.command}' not found. No default handler plugin is loaded.")
 
 def cli():
-    parser = argparse.ArgumentParser(description="An extensible, interactive shell.")
+    parser = argparse.ArgumentParser(description="An extensible, interactive shell framework.")
+    # This parser now only exists to capture arguments for the plugins.
+    parser.add_argument('plugin_name', nargs='?', help='Optional: The name of a plugin to load on startup.')
+    parser.add_argument('plugin_args', nargs=argparse.REMAINDER, help='Optional arguments for the plugin.')
     
-
-    shell = TacoShell()
+    # We use parse_known_args to separate cmd2's args from our own
+    args, _ = parser.parse_known_args()
+    
+    shell = TacoShell(plugin_args=args)
     sys.exit(shell.cmdloop())
 
 if __name__ == "__main__":
