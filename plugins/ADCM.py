@@ -2,13 +2,11 @@ import argparse
 import boto3
 from typing import List
 
-# Import all your existing, correct AWS data classes
-# NOTE: These classes (AwsInstance, etc.) do not need to be changed.
 from plugin_interface import BasePlugin
 from aws_instances import InstanceGroup
 from aws_commands import SimpleCommandHandler
 
-class AWSPlugin:
+class AWSPlugin(BasePlugin):
     """
     This is a 'mixin' class for cmd2. It provides all AWS-related commands
     and functionality to the main shell.
