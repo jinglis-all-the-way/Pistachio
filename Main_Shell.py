@@ -417,8 +417,8 @@ class AWSInteractiveShell:
         self.ec2_client = boto3.client('ec2')
                         
         # Instantiate objects from the AWS library
-        self.instance_group = aws_instances.InstanceGroup(ec2_client=self.ec2_client, initial_instances=instance_list)
-        self.command_handler = aws_commands.AsyncCommandHandler() if use_async else aws_commands.SimpleCommandHandler()
+        self.instance_group = InstanceGroup(ec2_client=self.ec2_client, initial_instances=instance_list)
+        self.command_handler = AsyncCommandHandler() if use_async else SimpleCommandHandler()
         
         self.loaded_plugins = {}
         
