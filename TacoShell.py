@@ -40,9 +40,7 @@ class TacoShell(cmd2.Cmd):
             return
             
         try:
-            print(f"Plugin : {args.plugin_name}")
-            module = importlib.import_module(f"plugins.{args.plugin_name}")
-            print(f"Plugin : {module}")
+            module = importlib.import_module(f"{args.plugin_name}")
             for name, obj in inspect.getmembers(module, inspect.isclass):
                 if issubclass(obj, BasePlugin) and obj is not BasePlugin:
                     plugin_class = obj
