@@ -109,6 +109,28 @@ class TacoShell(cmd2.Cmd):
         del self.loaded_plugins[args.plugin_name]
         self.poutput(f"Plugin '{args.plugin_name}' unloaded successfully.")
 
+    def do_plugin_list(self, args: cmd2.Statement):
+        """Lists available plugins in the 'plugins' directory and shows which are loaded."""
+        self.poutput("\n--- Loaded Plugins ---")
+        if not self.loaded_plugins:
+            self.poutput("  No plugins are currently loaded.")
+        else:
+            for name in sorted(self.loaded_plugins.keys()):
+                self.poutput(f"  - {name}")
+
+        self.poutput("\n--- Available Plugins ---")
+        try:
+            # Use pkgutil to find all modules in the 'plugins' package
+            available = [name for _, name, _ in pkgutil.iter_modules(['plugins'])]
+            if not available:
+                self.poutput("  No plugins found in the 'plugins' directory.")
+            else:
+                for name in sorted(available):
+                    status = "(loaded)" if name in self.loaded_plugins else ""
+                    self.poutput(f"  - {name} {status}")
+        except ImportError:
+            self.poutput("  Error: 'plugins' directory not found or is not a valid package (missing __init__.py?).")
+    
     def _parse_plugin_args(self, arg_list: list) -> dict:
         """A simple key-value parser for plugin arguments like --key value."""
         kwargs = {}
