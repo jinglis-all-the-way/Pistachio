@@ -47,6 +47,8 @@ class TacoShell(cmd2.Cmd):
                     
                     plugin_kwargs = self._parse_plugin_args(args.plugin_args)
                     plugin_instance = plugin_class(**plugin_kwargs)
+                    plugin_instance._shell = self
+                    print(f"Plugin : {plugin_instance.name}")
                     
                     # Check if this plugin wants to be the default handler
                     is_default_handler = plugin_instance.default != BasePlugin.default
