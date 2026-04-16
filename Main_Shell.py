@@ -21,10 +21,6 @@ from prompt_toolkit.history import FileHistory
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
 
-# --- Import all AWS logic from your library ---
-# This assumes you have a file named 'aws_lib.py' in the same directory
-# or in Python's path.
-from lib import aws_instances, aws_commands
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
