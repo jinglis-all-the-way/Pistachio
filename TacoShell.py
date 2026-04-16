@@ -202,6 +202,26 @@ class TacoShell:
             self.default_command_handler = None
             print(f"Unregistered default command handler from plugin '{plugin_name}'.")
 
+    def _list_plugins(self, *args):
+        print("--- Loaded Plugins ---")
+        if not self.loaded_plugins:
+            print("  No plugins are currently loaded.")
+        else:
+            for name in self.loaded_plugins.keys():
+                print(f"  - {name}")
+
+        print("\n--- Available Plugins (in 'plugins/' directory) ---")
+        try:
+            available = [name for _, name, _ in pkgutil.iter_modules(['plugins'])]
+            if not available:
+                print("  No plugins found in the 'plugins' directory.")
+            else:
+                for name in available:
+                    status = "(loaded)" if name in self.loaded_plugins else ""
+                    print(f"  - {name} {status}")
+        except FileNotFoundError:
+            print("  'plugins' directory not found.")
+
     def _handle_input(self, input_string: str):
         parts = input_string.strip().split()
         if not parts:
