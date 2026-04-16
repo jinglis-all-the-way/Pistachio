@@ -40,6 +40,7 @@ class TacoShell(cmd2.Cmd):
             return
             
         try:
+            print(f"Plugin : {args.plugin_name}")
             module = importlib.import_module(f"plugins.{args.plugin_name}")
             for name, obj in inspect.getmembers(module, inspect.isclass):
                 if issubclass(obj, BasePlugin) and obj is not BasePlugin:
@@ -48,7 +49,7 @@ class TacoShell(cmd2.Cmd):
                     plugin_kwargs = self._parse_plugin_args(args.plugin_args)
                     plugin_instance = plugin_class(**plugin_kwargs)
                     plugin_instance._shell = self
-                    print(f"Plugin : {plugin_instance.name}")
+                    
                     
                     # Check if this plugin wants to be the default handler
                     is_default_handler = plugin_instance.default != BasePlugin.default
