@@ -14,11 +14,10 @@ class AWSPlugin:
     This is a 'mixin' class for cmd2. It provides all AWS-related commands
     and functionality to the main shell.
     """
-    def __init__(self, use_async=True, initial_instances=None):
-        self._use_async = use_async
+    def __init__(self, initial_instances=None):
         self._instance_group = InstanceGroup(initial_instances=initial_instances)
-        self._command_handler = AsyncCommandHandler() if use_async else SimpleCommandHandler()
-        print("AWS Plugin Loaded.")
+        self._command_handler = SimpleCommandHandler()
+        print("AWS Distributed Command Manager Plugin Loaded.")
 
     # --- Default Command Handler for Remote Execution ---
     def default(self, statement: str):
