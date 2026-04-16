@@ -60,19 +60,21 @@ class AWSPlugin:
     file_parser = argparse.ArgumentParser()
     file_parser.add_argument('filename', help='The filename for the group file (e.g., my-group)')
     
+    """
     @cmd2.with_argparser(file_parser)
     def do_group_save(self, args: argparse.Namespace):
-        """Saves the current instance group to a JSON file."""
+        # Saves the current instance group to a JSON file.
         # ... (implementation is the same, just uses self._instance_group)
         pass
 
     @cmd2.with_argparser(file_parser)
     def do_group_load(self, args: argparse.Namespace):
-        """Loads an instance group from a JSON file."""
+        #Loads an instance group from a JSON file.
         # ... (implementation is the same, just uses self._instance_group)
         pass
         
     def do_group_check_health(self, args: str):
-        """Checks the SSM readiness of all instances in the group."""
+        #Checks the SSM readiness of all instances in the group.
         # ... (implementation is the same, just uses self._instance_group)
         pass
+    """
