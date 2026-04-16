@@ -3,6 +3,7 @@ import cmd2
 import importlib
 import inspect
 import sys
+import pkgutil
 from abc import ABC, abstractmethod
 
 class BasePlugin(ABC):
