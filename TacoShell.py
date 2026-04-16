@@ -34,13 +34,32 @@ class TacoShell(cmd2.Cmd):
 
     @cmd2.with_argparser(plugin_parser)
     def do_plugin_load(self, args: argparse.Namespace):
-        """Loads a plugin, its commands, and optionally its default handler."""
+        """Loads a plugin and prints detailed error information on failure."""
         if args.plugin_name in self.loaded_plugins:
             self.poutput(f"Error: Plugin '{args.plugin_name}' is already loaded.")
             return
             
         try:
+            # --- DIAGNOSTIC STEP ---
+            self.poutput("\n--- DIAGNOSTIC: Forcing Python's Search Path ---")
+            import sys
+            import os
+            
+            # Get the absolute path to the directory where this script lives
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            
+            # Explicitly add the script's directory to the front of the search path
+            if script_dir not in sys.path:
+                sys.path.insert(0, script_dir)
+            
+            self.poutput(f"Ensuring project directory is in path: {script_dir}")
+            self.poutput("---------------------------------------------------\n")
+
+            self.poutput(f"Attempting to import module: 'plugins.{args.plugin_name}'...")
             module = importlib.import_module(f"plugins.{args.plugin_name}")
+            
+            # If import succeeds, proceed with loading logic as before
+            
             for name, obj in inspect.getmembers(module, inspect.isclass):
                 if issubclass(obj, BasePlugin) and obj is not BasePlugin:
                     plugin_class = obj
@@ -66,13 +85,21 @@ class TacoShell(cmd2.Cmd):
                         self.default = plugin_instance.default
                         self.default_handler_plugin = plugin_instance.name
                         self.poutput(f"Plugin '{plugin_instance.name}' has registered as the default command handler.")
-                    return
+                    return # Exit after successful load
             
-            self.poutput(f"Error: No valid plugin class found in '{args.plugin_name}'.")
-        except ImportError:
-            self.poutput(f"Error: Plugin '{args.plugin_name}' not found.")
+            self.poutput(f"Error: Import succeeded, but no valid plugin class was found in '{args.plugin_name}'.")
+
         except Exception as e:
-            self.poutput(f"An unexpected error occurred: {e}")
+            # --- CATCH-ALL EXCEPTION FOR MAXIMUM DIAGNOSIS ---
+            import traceback
+            self.poutput("\n" + "="*60)
+            self.poutput("--- AN UNEXPECTED AND CRITICAL ERROR OCCURRED DURING PLUGIN LOAD ---")
+            self.poutput(f"Python Exception Type: {type(e).__name__}")
+            self.poutput(f"Python Error Message: {e}")
+            self.poutput("\n--- FULL TRACEBACK ---")
+            # This prints the full, detailed error stack trace
+            self.poutput(traceback.format_exc())
+            self.poutput("="*60 + "\n")
 
     unload_parser = argparse.ArgumentParser()
     unload_parser.add_argument('plugin_name', help='The name of the plugin to unload.')
