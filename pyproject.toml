@@ -1,0 +1,6 @@
+[project]
+name = "taco-shell"
+version = "0.1.0"
+
+[project.scripts]
+taco = "TacoShell:cli" # This creates a 'taco' command that runs your cli() function
