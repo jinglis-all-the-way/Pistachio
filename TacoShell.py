@@ -4,22 +4,8 @@ import importlib
 import inspect
 import sys
 import pkgutil
-from abc import ABC, abstractmethod
 
-class BasePlugin(ABC):
-    """The contract for all plugins."""
-    def __init__(self, **kwargs):
-        self._shell = None
-    
-    @property
-    def name(self) -> str: pass
-
-    @property
-    def commands(self) -> dict: pass
-    
-    def default(self, statement: str):
-        """Plugins can override this method to act as a fallback command handler."""
-        pass # The base implementation does nothing.
+from plugin_interface import BasePlugin
 
 class TacoShell(cmd2.Cmd):
     """A generic, multi-plugin interactive shell framework powered by cmd2."""
