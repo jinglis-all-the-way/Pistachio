@@ -4,6 +4,7 @@ from typing import List
 
 # Import all your existing, correct AWS data classes
 # NOTE: These classes (AwsInstance, etc.) do not need to be changed.
+from TacoShell import BasePlugin
 from aws_instances import InstanceGroup
 from aws_commands import SimpleCommandHandler
 
