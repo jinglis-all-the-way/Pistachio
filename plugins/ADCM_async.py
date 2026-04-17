@@ -1,23 +1,33 @@
 import argparse
 import asyncio
+import cmd2
 import boto3
 import aioboto3
-from typing import List
+from typing import List, Optional
 
-# Import all your existing, correct AWS data classes
-# NOTE: These classes (AwsInstance, etc.) do not need to be changed.
-from aws_instances import InstanceGroup
-from aws_commands import AsyncCommandHandler
+from plugin_interface import BasePlugin
+from lib.aws_instances import InstanceGroup
+from lib.aws_commands import AsyncCommandHandler
 
-class AWSPlugin:
+class AWSPlugin(BasePlugin, cmd2.CommandSet):
     """
     This is a 'mixin' class for cmd2. It provides all AWS-related commands
     and functionality to the main shell.
     """
-    def __init__(self, initial_instances=None):
+    def __init__(self, initial_instances: Optional[List[str]] = None):
         self._instance_group = InstanceGroup(initial_instances=initial_instances)
-        self._command_handler = AsyncCommandHandler() 
+        self._command_handler = AsyncCommandHandler()
+        self._shell: Optional[cmd2.Cmd] = None
         print("AWS Distributed Command Manager (ASYNC) Plugin Loaded.")
+
+    @property
+    def name(self) -> str:
+        """The unique name of the plugin."""
+        return "ADCM_async"
+
+    def set_shell(self, shell: cmd2.Cmd) -> None:
+        """Set the reference to the cmd2 shell instance."""
+        self._shell = shell
 
     # --- Default Command Handler for Remote Execution ---
     def default(self, statement: str):

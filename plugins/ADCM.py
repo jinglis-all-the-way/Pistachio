@@ -18,6 +18,11 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
         self._shell: Optional[cmd2.Cmd] = None
         print("AWS Distributed Command Manager Plugin Loaded.")
 
+    @property
+    def name(self) -> str:
+        """The unique name of the plugin."""
+        return "ADCM"
+
     def set_shell(self, shell: cmd2.Cmd) -> None:
         """Set the reference to the cmd2 shell instance."""
         self._shell = shell
