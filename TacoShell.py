@@ -26,7 +26,7 @@ class TacoShell(cmd2.Cmd):
 
         # If plugin arguments were passed at startup, load the plugin immediately
         if plugin_args and plugin_args.plugin_name:
-            self.do_plugin_load(plugin_args.Namespace)
+            self._load_plugin(plugin_args.plugin_name, plugin_args.plugin_args)
 
     # --- Plugin Management Commands ---
     
@@ -34,17 +34,15 @@ class TacoShell(cmd2.Cmd):
     plugin_parser.add_argument('plugin_name', help='The name of the plugin file to load (e.g., aws_plugin)')
     plugin_parser.add_argument('plugin_args', nargs=argparse.REMAINDER, help='Optional arguments for the plugin (e.g., --mode async)')
 
-    @cmd2.with_argparser(plugin_parser)
-    def do_plugin_load(self, args: argparse.Namespace):
-        """Loads a plugin and prints detailed error information on failure."""
-        if args.plugin_name in self.loaded_plugins:
-            self.poutput(f"Error: Plugin '{args.plugin_name}' is already loaded.")
+    def _load_plugin(self, plugin_name: str, plugin_args: list[str]):
+        """Internal method to load a plugin. Used by both CLI and startup."""
+        if plugin_name in self.loaded_plugins:
+            self.poutput(f"Error: Plugin '{plugin_name}' is already loaded.")
             return
             
         try:
             # --- DIAGNOSTIC STEP ---
             self.poutput("\n--- DIAGNOSTIC: Forcing Python's Search Path ---")
-            import sys
             import os
             
             # Get the absolute path to the directory where this script lives
@@ -57,8 +55,8 @@ class TacoShell(cmd2.Cmd):
             self.poutput(f"Ensuring project directory is in path: {script_dir}")
             self.poutput("---------------------------------------------------\n")
 
-            self.poutput(f"Attempting to import module: 'plugins.{args.plugin_name}'...")
-            module = importlib.import_module(f"plugins.{args.plugin_name}")
+            self.poutput(f"Attempting to import module: 'plugins.{plugin_name}'...")
+            module = importlib.import_module(f"plugins.{plugin_name}")
             
             # If import succeeds, proceed with loading logic as before
             
@@ -66,7 +64,7 @@ class TacoShell(cmd2.Cmd):
                 if issubclass(obj, BasePlugin) and obj is not BasePlugin:
                     plugin_class = obj
                     
-                    plugin_kwargs = self._parse_plugin_args(args.plugin_args)
+                    plugin_kwargs = self._parse_plugin_args(plugin_args)
                     plugin_instance = plugin_class(**plugin_kwargs)
                     
                     # Check if this plugin wants to be the default handler
@@ -92,7 +90,7 @@ class TacoShell(cmd2.Cmd):
                         self.poutput(f"Plugin '{plugin_instance.name}' has registered as the default command handler.")
                     return # Exit after successful load
             
-            self.poutput(f"Error: Import succeeded, but no valid plugin class was found in '{args.plugin_name}'.")
+            self.poutput(f"Error: Import succeeded, but no valid plugin class was found in '{plugin_name}'.")
 
         except Exception as e:
             # --- CATCH-ALL EXCEPTION FOR MAXIMUM DIAGNOSIS ---
@@ -105,6 +103,11 @@ class TacoShell(cmd2.Cmd):
             # This prints the full, detailed error stack trace
             self.poutput(traceback.format_exc())
             self.poutput("="*60 + "\n")
+
+    @cmd2.with_argparser(plugin_parser)
+    def do_plugin_load(self, args: argparse.Namespace):
+        """Loads a plugin and prints detailed error information on failure."""
+        self._load_plugin(args.plugin_name, args.plugin_args)
 
     unload_parser = argparse.ArgumentParser()
     unload_parser.add_argument('plugin_name', help='The name of the plugin to unload.')
@@ -133,7 +136,7 @@ class TacoShell(cmd2.Cmd):
         del self.loaded_plugins[args.plugin_name]
         self.poutput(f"Plugin '{args.plugin_name}' unloaded successfully.")
 
-    def do_plugin_list(self, args: cmd2.Statement):
+    def do_plugin_list(self, _: cmd2.Statement):
         """Lists available plugins in the 'plugins' directory and shows which are loaded."""
         self.poutput("\n--- Loaded Plugins ---")
         if not self.loaded_plugins:
