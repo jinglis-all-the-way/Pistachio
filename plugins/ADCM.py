@@ -1,20 +1,26 @@
 import argparse
-import boto3
-from typing import List
+import cmd2
+from typing import List, Optional
 
 from plugin_interface import BasePlugin
 from lib.aws_instances import InstanceGroup
 from lib.aws_commands import SimpleCommandHandler
 
-class AWSPlugin(BasePlugin):
+
+class AWSPlugin(BasePlugin, cmd2.CommandSet):
     """
     This is a 'mixin' class for cmd2. It provides all AWS-related commands
     and functionality to the main shell.
     """
-    def __init__(self, initial_instances=None):
+    def __init__(self, initial_instances: Optional[List[str]] = None):
         self._instance_group = InstanceGroup(initial_instances=initial_instances)
         self._command_handler = SimpleCommandHandler()
+        self._shell: Optional[cmd2.Cmd] = None
         print("AWS Distributed Command Manager Plugin Loaded.")
+
+    def set_shell(self, shell: cmd2.Cmd) -> None:
+        """Set the reference to the cmd2 shell instance."""
+        self._shell = shell
 
     # --- Default Command Handler for Remote Execution ---
     def default(self, statement: str):
@@ -22,7 +28,8 @@ class AWSPlugin(BasePlugin):
         This method is called by cmd2 for any command that is not a
         built-in shell command.
         """
-        self._shell.poutput(f"'{statement.split()[0]}' is not a built-in command. Passing to AWS command handler...")
+        if self._shell:
+            self._shell.poutput(f"'{statement.split()[0]}' is not a built-in command. Passing to AWS command handler...")
         targets = self._instance_group.get_instances()
         
         self._command_handler.execute_distributable_command(statement, targets)
@@ -43,16 +50,25 @@ class AWSPlugin(BasePlugin):
         """Remove one or more instances from the current target group."""
         self._instance_group.remove_instances(args.instances)
 
-    def do_group_show(self, args: str):
+    def do_group_show(self, _: argparse.Namespace) -> None:
         """Show the instances currently in the target group."""
-        targets = self._instance_group.get_instance_objects()
-        if not targets:
-            self._shell.poutput("No instances are currently in the target group.")
+        instances = self._instance_group.get_instances()
+        if not instances:
+            message = "No instances are currently in the target group."
+            if self._shell:
+                self._shell.poutput(message)
+            else:
+                print(message)
         else:
             output = "Current target instances:\n"
-            for inst in sorted(list(targets), key=lambda i: i.name):
-                output += f"  - {inst.name} ({inst.id})\n"
-            self._shell.poutput(output)
+            for inst in sorted(instances, key=lambda i: getattr(i, 'name', '') or ""):
+                name = getattr(inst, 'name', '')
+                inst_id = getattr(inst, 'id', '')
+                output += f"  - {name} ({inst_id})\n"
+            if self._shell:
+                self._shell.poutput(output)
+            else:
+                print(output)
             
     # Create an argparser for commands that take a single filename
     file_parser = argparse.ArgumentParser()
