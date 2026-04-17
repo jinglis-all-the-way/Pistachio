@@ -4,10 +4,9 @@ import importlib
 import inspect
 import sys
 import pkgutil
-from typing import Optional
+from typing import Optional, Dict, List, Union
 
 from plugin_interface import BasePlugin
-from typing import Dict
 
 class TacoShell(cmd2.Cmd):
     """A generic, multi-plugin interactive shell framework powered by cmd2."""
@@ -34,7 +33,7 @@ class TacoShell(cmd2.Cmd):
     plugin_parser.add_argument('plugin_name', help='The name of the plugin file to load (e.g., aws_plugin)')
     plugin_parser.add_argument('plugin_args', nargs=argparse.REMAINDER, help='Optional arguments for the plugin (e.g., --mode async)')
 
-    def _load_plugin(self, plugin_name: str, plugin_args: list[str]):
+    def _load_plugin(self, plugin_name: str, plugin_args: List[str]) -> None:
         """Internal method to load a plugin. Used by both CLI and startup."""
         if plugin_name in self.loaded_plugins:
             self.poutput(f"Error: Plugin '{plugin_name}' is already loaded.")
@@ -158,9 +157,9 @@ class TacoShell(cmd2.Cmd):
         except ImportError:
             self.poutput("  Error: 'plugins' directory not found or is not a valid package (missing __init__.py?).")
     
-    def _parse_plugin_args(self, arg_list: list[str]) -> dict[str, str | bool]:
+    def _parse_plugin_args(self, arg_list: List[str]) -> Dict[str, Union[str, bool]]:
         """A simple key-value parser for plugin arguments like --key value."""
-        kwargs: dict[str, str | bool] = {}
+        kwargs: Dict[str, Union[str, bool]] = {}
         i = 0
         while i < len(arg_list):
             if arg_list[i].startswith('--'):
@@ -179,7 +178,7 @@ class TacoShell(cmd2.Cmd):
 
         
 
-    def default(self, statement: cmd2.Statement) -> bool | None:
+    def default(self, statement: cmd2.Statement) -> Union[bool, None]:
         """The shell's own default handler, for when no plugin is loaded."""
         self.poutput(f"Error: Command '{statement.command}' not found. No default handler plugin is loaded.")
         return False
