@@ -191,4 +191,8 @@ class InstanceGroup:
 
     def get_instances(self) -> Dict[str, str]:
         return {inst.id: inst.name for inst in self._instances if inst.id}
+
+    def get_instance_objects(self) -> Set['StrippedAwsInstance']:
+        """Returns the set of stored StrippedAwsInstance objects for display."""
+        return self._instances
            
