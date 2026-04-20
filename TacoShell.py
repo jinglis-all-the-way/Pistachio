@@ -41,18 +41,18 @@ class TacoShell(cmd2.Cmd):
             
         try:
             # --- DIAGNOSTIC STEP ---
-            self.poutput("\n--- DIAGNOSTIC: Forcing Python's Search Path ---")
-            import os
+            #self.poutput("\n--- DIAGNOSTIC: Forcing Python's Search Path ---")
+            #import os
             
             # Get the absolute path to the directory where this script lives
-            script_dir = os.path.dirname(os.path.abspath(__file__))
+            #script_dir = os.path.dirname(os.path.abspath(__file__))
             
             # Explicitly add the script's directory to the front of the search path
-            if script_dir not in sys.path:
-                sys.path.insert(0, script_dir)
+            #if script_dir not in sys.path:
+            #    sys.path.insert(0, script_dir)
             
-            self.poutput(f"Ensuring project directory is in path: {script_dir}")
-            self.poutput("---------------------------------------------------\n")
+            #self.poutput(f"Ensuring project directory is in path: {script_dir}")
+            #self.poutput("---------------------------------------------------\n")
 
             self.poutput(f"Attempting to import module: 'plugins.{plugin_name}'...")
             module = importlib.import_module(f"plugins.{plugin_name}")
