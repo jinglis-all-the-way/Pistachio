@@ -33,11 +33,12 @@ class AWSPlugin(cmd2.CommandSet):
         This method is called by cmd2 for any command that is not a
         built-in shell command.
         """
+        commands_to_run = statement.raw
         if self._shell:
-            self._shell.poutput(f"'{statement.raw}' is not a built-in command. Passing to AWS command handler...")
+            self._shell.poutput(f"'{commands_to_run}' is not a built-in command. Passing to AWS command handler...")
         targets = self._instance_group.get_instances()
         
-        self._command_handler.execute_distributable_command(statement, targets)
+        self._command_handler.execute_distributable_command(commands_to_run, targets)
 
     # --- 'group' Sub-commands ---
     
