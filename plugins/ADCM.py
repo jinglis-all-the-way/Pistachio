@@ -52,12 +52,14 @@ class AWSPlugin(cmd2.CommandSet):
         """Category command for AWS group management."""
         self._shell.poutput("Group management commands: add, remove, show, save, load")
 
-    def do_group_add(self, args: List[str]):
+    def do_group_add(self, arg_string: str):
         """Add one or more instances to the current target group."""
         if not args:
             self._shell.poutput("Usage: group add <instance_id_or_name> ...")
             return
-        self._instance_group.add_instances(args)
+        
+        instance_list = arg_string.split()
+        self._instance_group.add_instances(instance_list)
 
     def do_group_remove(self, args: List[str]):
         """Remove one or more instances from the current target group."""
