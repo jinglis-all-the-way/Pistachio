@@ -60,40 +60,39 @@ class TacoShell(cmd2.Cmd):
             # If import succeeds, proceed with loading logic as before
             
             for _, obj in inspect.getmembers(module, inspect.isclass):
-                if issubclass(obj):
-                    plugin_class = obj
-                    
-                    plugin_kwargs = self._parse_plugin_args(plugin_args)
-                    plugin_instance = plugin_class(**plugin_kwargs)
-                    
-                    # Give the plugin a reference back to the shell
-                    if hasattr(plugin_instance, 'set_shell'):
-                        plugin_instance.set_shell(self)
-                    
-                    # Check if this plugin wants to be the default handler
-                    is_default_handler = plugin_instance.default
-                    if is_default_handler and self.default_handler_plugin is not None:
-                        self.poutput(f"Error: Cannot load '{plugin_instance.name}' because another plugin ('{self.default_handler_plugin}') has already registered a default command handler.")
-                        return
+                plugin_class = obj
+                
+                plugin_kwargs = self._parse_plugin_args(plugin_args)
+                plugin_instance = plugin_class(**plugin_kwargs)
+                
+                # Give the plugin a reference back to the shell
+                if hasattr(plugin_instance, 'set_shell'):
+                    plugin_instance.set_shell(self)
+                
+                # Check if this plugin wants to be the default handler
+                is_default_handler = plugin_instance.default
+                if is_default_handler and self.default_handler_plugin is not None:
+                    self.poutput(f"Error: Cannot load '{plugin_instance.name}' because another plugin ('{self.default_handler_plugin}') has already registered a default command handler.")
+                    return
 
-                    # Register commands by copying do_* methods to shell instance
-                    for method_name in dir(plugin_instance):
-                        if method_name.startswith('do_'):
-                            method = getattr(plugin_instance, method_name)
-                            if callable(method):
-                                setattr(self, method_name, method)
-                    
-                    self.loaded_plugins[plugin_instance.name] = plugin_instance
-                    self.poutput(f"Successfully loaded plugin '{plugin_instance.name}'.")
+                # Register commands by copying do_* methods to shell instance
+                for method_name in dir(plugin_instance):
+                    if method_name.startswith('do_'):
+                        method = getattr(plugin_instance, method_name)
+                        if callable(method):
+                            setattr(self, method_name, method)
+                
+                self.loaded_plugins[plugin_instance.name] = plugin_instance
+                self.poutput(f"Successfully loaded plugin '{plugin_instance.name}'.")
 
-                    # If it's a default handler, register it
-                    if is_default_handler:
-                        self.default = plugin_instance.default
-                        self.default_handler_plugin = plugin_instance.name
-                        self.poutput(f"Plugin '{plugin_instance.name}' has registered as the default command handler.")
-                    return # Exit after successful load
+                # If it's a default handler, register it
+                if is_default_handler:
+                    self.default = plugin_instance.default
+                    self.default_handler_plugin = plugin_instance.name
+                    self.poutput(f"Plugin '{plugin_instance.name}' has registered as the default command handler.")
+                return # Exit after successful load
             
-            self.poutput(f"Error: Import succeeded, but no valid plugin class was found in '{plugin_name}'.")
+           
 
         except Exception as e:
             # --- CATCH-ALL EXCEPTION FOR MAXIMUM DIAGNOSIS ---
