@@ -34,7 +34,7 @@ class AWSPlugin(cmd2.CommandSet):
         built-in shell command.
         """
         if self._shell:
-            self._shell.poutput(f"'{statement.split()[0]}' is not a built-in command. Passing to AWS command handler...")
+            self._shell.poutput(f"'{statement.raw}' is not a built-in command. Passing to AWS command handler...")
         targets = self._instance_group.get_instances()
         
         self._command_handler.execute_distributable_command(statement, targets)
