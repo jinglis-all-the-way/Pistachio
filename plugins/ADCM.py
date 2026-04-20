@@ -54,7 +54,7 @@ class AWSPlugin(cmd2.CommandSet):
 
     def do_group_add(self, arg_string: str):
         """Add one or more instances to the current target group."""
-        if not args:
+        if not arg_string:
             self._shell.poutput("Usage: group add <instance_id_or_name> ...")
             return
         
