@@ -45,39 +45,41 @@ class AWSPlugin(cmd2.CommandSet):
     instance_parser = argparse.ArgumentParser()
     instance_parser.add_argument('instances', nargs='+', help='One or more instance names or IDs')
     
-    @cmd2.with_argparser(instance_parser)
-    def do_group_add(self, args: argparse.Namespace):
+    # --- Command Methods ---
+    # These 'do_*' methods will be copied onto the main shell instance.
+
+    def do_group(self, args: List[str]):
+        """Category command for AWS group management."""
+        self._shell.poutput("Group management commands: add, remove, show, save, load")
+
+    def do_group_add(self, args: List[str]):
         """Add one or more instances to the current target group."""
-        self._instance_group.add_instances(args.instances)
+        if not args:
+            self._shell.poutput("Usage: group add <instance_id_or_name> ...")
+            return
+        self._instance_group.add_instances(args)
 
-    @cmd2.with_argparser(instance_parser)
-    def do_group_remove(self, args: argparse.Namespace):
+    def do_group_remove(self, args: List[str]):
         """Remove one or more instances from the current target group."""
-        self._instance_group.remove_instances(args.instances)
+        if not args:
+            self._shell.poutput("Usage: group remove <instance_id_or_name> ...")
+            return
+        self._instance_group.remove_instances(args)
 
-    def do_group_show(self, _: argparse.Namespace) -> None:
+    def do_group_show(self, args: List[str]):
         """Show the instances currently in the target group."""
-        instances = self._instance_group.get_instances()
-        if not instances:
-            message = "No instances are currently in the target group."
-            if self._shell:
-                self._shell.poutput(message)
-            else:
-                print(message)
+        targets = self._instance_group.get_instance_objects()
+        if not targets:
+            self._shell.poutput("No instances are currently in the target group.")
         else:
             output = "Current target instances:\n"
-            for inst in sorted(instances, key=lambda i: getattr(i, 'name', '') or ""):
-                name = getattr(inst, 'name', '')
-                inst_id = getattr(inst, 'id', '')
-                output += f"  - {name} ({inst_id})\n"
-            if self._shell:
-                self._shell.poutput(output)
-            else:
-                print(output)
+            for inst in sorted(list(targets), key=lambda i: i.name):
+                output += f"  - {inst.name} ({inst.id})\n"
+            self._shell.poutput(output)
             
-    # Create an argparser for commands that take a single filename
-    file_parser = argparse.ArgumentParser()
-    file_parser.add_argument('filename', help='The filename for the group file (e.g., my-group)')
+   # # Create an argparser for commands that take a single filename
+    #file_parser = argparse.ArgumentParser()
+    #file_parser.add_argument('filename', help='The filename for the group file (e.g., my-group)')
     
     """
     @cmd2.with_argparser(file_parser)
