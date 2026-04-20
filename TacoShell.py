@@ -6,7 +6,7 @@ import sys
 import pkgutil
 from typing import Optional, Dict, List, Union
 
-from plugin_interface import BasePlugin
+# from plugin_interface import BasePlugin
 
 class TacoShell(cmd2.Cmd):
     """A generic, multi-plugin interactive shell framework powered by cmd2."""
@@ -20,7 +20,7 @@ class TacoShell(cmd2.Cmd):
         self.hidden_commands.extend(['alias', 'macro', 'run_script', 'run_pyscript', 'edit', '_relative_run_script'])
         
         # --- State for managing multiple plugins ---
-        self.loaded_plugins: Dict[str, BasePlugin] = {}
+        self.loaded_plugins: Dict[str] = {} 
         self.default_handler_plugin: Optional[str] = None
 
         # If plugin arguments were passed at startup, load the plugin immediately
@@ -60,7 +60,7 @@ class TacoShell(cmd2.Cmd):
             # If import succeeds, proceed with loading logic as before
             
             for _, obj in inspect.getmembers(module, inspect.isclass):
-                if issubclass(obj, BasePlugin) and obj is not BasePlugin:
+                if issubclass(obj):
                     plugin_class = obj
                     
                     plugin_kwargs = self._parse_plugin_args(plugin_args)
@@ -71,7 +71,7 @@ class TacoShell(cmd2.Cmd):
                         plugin_instance.set_shell(self)
                     
                     # Check if this plugin wants to be the default handler
-                    is_default_handler = plugin_instance.default != BasePlugin.default
+                    is_default_handler = plugin_instance.default
                     if is_default_handler and self.default_handler_plugin is not None:
                         self.poutput(f"Error: Cannot load '{plugin_instance.name}' because another plugin ('{self.default_handler_plugin}') has already registered a default command handler.")
                         return

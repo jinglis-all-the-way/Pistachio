@@ -2,12 +2,12 @@ import argparse
 import cmd2
 from typing import List, Optional
 
-from plugin_interface import BasePlugin
+#from plugin_interface import BasePlugin
 from lib.aws_instances import InstanceGroup
 from lib.aws_commands import SimpleCommandHandler
 
 
-class AWSPlugin(BasePlugin, cmd2.CommandSet):
+class AWSPlugin(cmd2.CommandSet):
     """
     This is a 'mixin' class for cmd2. It provides all AWS-related commands
     and functionality to the main shell.
