@@ -48,7 +48,7 @@ class AWSPlugin(cmd2.CommandSet):
     # --- Command Methods ---
     # These 'do_*' methods will be copied onto the main shell instance.
 
-    def do_group(self, args: List[str]):
+    def do_group(self, arg_string: str):
         """Category command for AWS group management."""
         self._shell.poutput("Group management commands: add, remove, show, save, load")
 
@@ -61,14 +61,15 @@ class AWSPlugin(cmd2.CommandSet):
         instance_list = arg_string.split()
         self._instance_group.add_instances(instance_list)
 
-    def do_group_remove(self, args: List[str]):
+    def do_group_remove(self, arg_string: str):
         """Remove one or more instances from the current target group."""
         if not args:
             self._shell.poutput("Usage: group remove <instance_id_or_name> ...")
             return
-        self._instance_group.remove_instances(args)
+            
+        self._instance_group.remove_instances(arg_string.split())
 
-    def do_group_show(self, args: List[str]):
+    def do_group_show(self, arg_string: str):
         """Show the instances currently in the target group."""
         targets = self._instance_group.get_instance_objects()
         if not targets:
