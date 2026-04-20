@@ -70,7 +70,7 @@ class AWSPlugin(cmd2.CommandSet):
 
     def do_group_show(self, args: List[str]):
         """Show the instances currently in the target group."""
-        targets = self._instance_group.get_instance_objects()
+        targets = self._instance_group.get_instances()
         if not targets:
             self._shell.poutput("No instances are currently in the target group.")
         else:
