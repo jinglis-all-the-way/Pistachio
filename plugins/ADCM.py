@@ -63,10 +63,10 @@ class AWSPlugin(cmd2.CommandSet):
 
     def do_group_remove(self, arg_string: str):
         """Remove one or more instances from the current target group."""
-        if not args:
+        if not arg_string:
             self._shell.poutput("Usage: group remove <instance_id_or_name> ...")
             return
-            
+
         self._instance_group.remove_instances(arg_string.split())
 
     def do_group_show(self, arg_string: str):
