@@ -6,8 +6,6 @@ import sys
 import pkgutil
 from typing import Optional, Dict, List, Union
 
-# from plugin_interface import BasePlugin
-
 class TacoShell(cmd2.Cmd):
     """A generic, multi-plugin interactive shell framework powered by cmd2."""
     
@@ -40,24 +38,8 @@ class TacoShell(cmd2.Cmd):
             return
             
         try:
-            # --- DIAGNOSTIC STEP ---
-            #self.poutput("\n--- DIAGNOSTIC: Forcing Python's Search Path ---")
-            #import os
-            
-            # Get the absolute path to the directory where this script lives
-            #script_dir = os.path.dirname(os.path.abspath(__file__))
-            
-            # Explicitly add the script's directory to the front of the search path
-            #if script_dir not in sys.path:
-            #    sys.path.insert(0, script_dir)
-            
-            #self.poutput(f"Ensuring project directory is in path: {script_dir}")
-            #self.poutput("---------------------------------------------------\n")
-
             self.poutput(f"Attempting to import module: 'plugins.{plugin_name}'...")
             module = importlib.import_module(f"plugins.{plugin_name}")
-            
-            # If import succeeds, proceed with loading logic as before
             
             for _, obj in inspect.getmembers(module, inspect.isclass):
                 plugin_class = obj
@@ -91,9 +73,7 @@ class TacoShell(cmd2.Cmd):
                     self.default_handler_plugin = plugin_instance.name
                     self.poutput(f"Plugin '{plugin_instance.name}' has registered as the default command handler.")
                 return # Exit after successful load
-            
-           
-
+    
         except Exception as e:
             # --- CATCH-ALL EXCEPTION FOR MAXIMUM DIAGNOSIS ---
             import traceback
@@ -188,7 +168,6 @@ class TacoShell(cmd2.Cmd):
 
 def cli():
     parser = argparse.ArgumentParser(description="An extensible, interactive shell framework.")
-    # This parser now only exists to capture arguments for the plugins.
     parser.add_argument('plugin_name', nargs='?', help='Optional: The name of a plugin to load on startup.')
     parser.add_argument('plugin_args', nargs=argparse.REMAINDER, help='Optional arguments for the plugin.')
     
