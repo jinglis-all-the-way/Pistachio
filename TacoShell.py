@@ -14,11 +14,13 @@ class PluginCommandSet(CommandSet):
         self.loaded_plugins: Dict[str] = {} 
         self.default_handler_plugin: Optional[str] = None
 
-        # If plugin arguments were passed at startup, load the plugin immediately
-        if plugin_args and plugin_args.plugin_name:
-            self._load_plugin(plugin_args.plugin_name, plugin_args.plugin_args)
-            
+        
+
         super().__init__()
+
+    plugin_parser = cmd2.Cmd2ArgumentParser()
+    plugin_parser.add_argument('plugin_name', help='The name of the plugin file to load (e.g., aws_plugin)')
+    plugin_parser.add_argument('plugin_args', nargs=argparse.REMAINDER, help='Optional arguments for the plugin (e.g., --mode async)')
 
     def do_load(self, plugin_name: cmd2.Statement):
         """Internal method to load a plugin. Used by both CLI and startup."""
@@ -74,25 +76,6 @@ class PluginCommandSet(CommandSet):
             # This prints the full, detailed error stack trace
             self.poutput(traceback.format_exc())
             self.poutput("="*60 + "\n")
-
-class TacoShell(cmd2.Cmd):
-    """A generic, multi-plugin interactive shell framework powered by cmd2."""
-    
-    def __init__(self, plugin_args: Optional[argparse.Namespace] = None):
-        super().__init__(allow_cli_args=False, auto_load_commands=True)
-        self.prompt = ">> "
-        self.intro = "Taco Shell Framework. Type 'help' or 'plugin_load <plugin_name>'."
-        
-        # Hide built-in cmd2 commands we don't need
-        self.hidden_commands.extend(['run_script', 'run_pyscript', '_relative_run_script'])
-        
-        
-
-    # --- Plugin Management Commands ---
-    
-    plugin_parser = argparse.ArgumentParser()
-    plugin_parser.add_argument('plugin_name', help='The name of the plugin file to load (e.g., aws_plugin)')
-    plugin_parser.add_argument('plugin_args', nargs=argparse.REMAINDER, help='Optional arguments for the plugin (e.g., --mode async)')
 
     @cmd2.with_argparser(plugin_parser)
     def do_plugin_load(self, args: argparse.Namespace):
@@ -166,6 +149,30 @@ class TacoShell(cmd2.Cmd):
                 # Handle positional args if needed in the future
                 i += 1
         return kwargs
+
+class TacoShell(cmd2.Cmd):
+    """A generic, multi-plugin interactive shell framework powered by cmd2."""
+    
+    def __init__(self, plugin_args: Optional[argparse.Namespace] = None):
+        super().__init__(allow_cli_args=False, auto_load_commands=True)
+        self.prompt = ">> "
+        self.intro = "Taco Shell Framework. Type 'help' or 'plugin_load <plugin_name>'."
+        
+        # Hide built-in cmd2 commands we don't need
+        self.hidden_commands.extend(['run_script', 'run_pyscript', '_relative_run_script'])
+        
+        # If plugin arguments were passed at startup, load the plugin immediately
+        if plugin_args and plugin_args.plugin_name:
+            self._load_plugin(plugin_args.plugin_name, plugin_args.plugin_args)
+        
+
+    # --- Plugin Management Commands ---
+    
+    plugin_parser = argparse.ArgumentParser()
+    plugin_parser.add_argument('plugin_name', help='The name of the plugin file to load (e.g., aws_plugin)')
+    plugin_parser.add_argument('plugin_args', nargs=argparse.REMAINDER, help='Optional arguments for the plugin (e.g., --mode async)')
+
+    
 
         
 
