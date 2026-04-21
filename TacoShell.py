@@ -7,7 +7,7 @@ import sys
 import pkgutil
 from typing import Optional, Dict, List, Union
 
-@with_default_category('plugin')
+@with_default_category('Plugin Management')
 class PluginCommandSet(CommandSet):
     def __init__(self):
         # --- State for managing multiple plugins ---
@@ -18,11 +18,28 @@ class PluginCommandSet(CommandSet):
 
         super().__init__()
 
-    plugin_parser = cmd2.Cmd2ArgumentParser()
-    plugin_parser.add_argument('plugin_name', help='The name of the plugin file to load (e.g., aws_plugin)')
-    plugin_parser.add_argument('plugin_args', nargs=argparse.REMAINDER, help='Optional arguments for the plugin (e.g., --mode async)')
+    # Base command parser
 
-    def do_load(self, plugin_name: cmd2.Statement):
+    plugin_parser = cmd2.Cmd2ArgumentParser(
+        prog='plugin',
+        description='Manage shell plugins.'
+    )
+
+    plugin_sub_parser = plugin_base_parser.add_subparsers(
+        title='subcommands',
+        dest='subcommand',
+        required=True,
+        help=Available subcommands
+    )
+
+    load_parser = plugin_sub_parser.add_parser('load', help='The name of the plugin file to load (e.g., aws_plugin)')
+    load_parser.add_argument('plugin_name', help='The name of the plugin file to load (e.g., aws_plugin)')
+    
+    @with_argparser
+    def do_plugin(self, args: argparse: argparse.Namespace):
+
+
+    def do_load(self, load_parser: cmd2.Statement):
         """Internal method to load a plugin. Used by both CLI and startup."""
         if plugin_name in self.loaded_plugins:
             self.poutput(f"Error: Plugin '{plugin_name}' is already loaded.")
