@@ -10,6 +10,14 @@ from typing import Optional, Dict, List, Union
 @with_default_category('plugin')
 class PluginCommandSet(CommandSet):
     def __init__(self):
+        # --- State for managing multiple plugins ---
+        self.loaded_plugins: Dict[str] = {} 
+        self.default_handler_plugin: Optional[str] = None
+
+        # If plugin arguments were passed at startup, load the plugin immediately
+        if plugin_args and plugin_args.plugin_name:
+            self._load_plugin(plugin_args.plugin_name, plugin_args.plugin_args)
+            
         super().__init__()
 
     def do_load(self, plugin_name: cmd2.Statement):
@@ -78,13 +86,7 @@ class TacoShell(cmd2.Cmd):
         # Hide built-in cmd2 commands we don't need
         self.hidden_commands.extend(['run_script', 'run_pyscript', '_relative_run_script'])
         
-        # --- State for managing multiple plugins ---
-        self.loaded_plugins: Dict[str] = {} 
-        self.default_handler_plugin: Optional[str] = None
-
-        # If plugin arguments were passed at startup, load the plugin immediately
-        if plugin_args and plugin_args.plugin_name:
-            self._load_plugin(plugin_args.plugin_name, plugin_args.plugin_args)
+        
 
     # --- Plugin Management Commands ---
     
