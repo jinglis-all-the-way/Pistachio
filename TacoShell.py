@@ -179,8 +179,7 @@ def cli():
     
     # We use parse_known_args to separate cmd2's args from our own
     args, _ = parser.parse_known_args()
-    plugin_commands = PluginCommandSet()
-    shell = TacoShell(plugin_args=args, command_sets=[plugin_commands])
+    shell = TacoShell(plugin_args=args)
     sys.exit(shell.cmdloop())
 
 if __name__ == "__main__":
