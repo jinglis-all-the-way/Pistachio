@@ -12,7 +12,7 @@ class PluginCommandSet(CommandSet):
     def __init__(self):
         super().__init__()
 
-    def do_load(self, plugin_name: cmd2.Statement)
+    def do_load(self, plugin_name: cmd2.Statement):
         """Internal method to load a plugin. Used by both CLI and startup."""
         if plugin_name in self.loaded_plugins:
             self.poutput(f"Error: Plugin '{plugin_name}' is already loaded.")
