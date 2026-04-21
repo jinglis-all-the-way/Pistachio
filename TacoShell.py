@@ -15,7 +15,7 @@ class TacoShell(cmd2.Cmd):
         self.intro = "Taco Shell Framework. Type 'help' or 'plugin_load <plugin_name>'."
         
         # Hide built-in cmd2 commands we don't need
-        self.hidden_commands.extend(['alias', 'macro', 'run_script', 'run_pyscript', 'edit', '_relative_run_script'])
+        self.hidden_commands.extend(['run_script', 'run_pyscript', '_relative_run_script'])
         
         # --- State for managing multiple plugins ---
         self.loaded_plugins: Dict[str] = {} 
