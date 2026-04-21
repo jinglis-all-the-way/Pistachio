@@ -51,7 +51,7 @@ class AWSPlugin(cmd2.CommandSet):
 
     def do_group(self, arg_string: str):
         """Category command for AWS group management."""
-        self._shell.poutput("Group management commands: add, remove, show, save, load")
+        self._shell.poutput("Group management commands: add, remove, show")
 
     def do_group_add(self, arg_string: str):
         """Add one or more instances to the current target group."""
@@ -81,25 +81,4 @@ class AWSPlugin(cmd2.CommandSet):
                 output += f"  - {inst.name} ({inst.id})\n"
             self._shell.poutput(output)
             
-   # # Create an argparser for commands that take a single filename
-    #file_parser = argparse.ArgumentParser()
-    #file_parser.add_argument('filename', help='The filename for the group file (e.g., my-group)')
-    
-    """
-    @cmd2.with_argparser(file_parser)
-    def do_group_save(self, args: argparse.Namespace):
-        # Saves the current instance group to a JSON file.
-        # ... (implementation is the same, just uses self._instance_group)
-        pass
-
-    @cmd2.with_argparser(file_parser)
-    def do_group_load(self, args: argparse.Namespace):
-        #Loads an instance group from a JSON file.
-        # ... (implementation is the same, just uses self._instance_group)
-        pass
-        
-    def do_group_check_health(self, args: str):
-        #Checks the SSM readiness of all instances in the group.
-        # ... (implementation is the same, just uses self._instance_group)
-        pass
-    """
+  
