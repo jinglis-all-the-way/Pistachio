@@ -4,7 +4,7 @@ import boto3
 import logging
 from botocore.exceptions import ClientError
 # Make sure your main script is in the path or installed
-from webshell import BasePlugin 
+from plugin_interface import BasePlugin 
 
 # --- Helper Functions (where you'll write the Boto3 logic) ---
 
