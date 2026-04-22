@@ -40,7 +40,7 @@ class PluginCommandSet(CommandSet):
         """Manage plugins (load, unload, show)."""
         # Route execution to internal handlers
         subcommand_map = {
-            'load': self._handle_load,
+            'load': self.do_load(load_parser=self.load_parser),
             'unload': self._handle_unload,
             'show': self._handle_show
         }
