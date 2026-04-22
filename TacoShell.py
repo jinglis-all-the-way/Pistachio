@@ -25,7 +25,7 @@ class PluginCommandSet(CommandSet):
         description='Manage shell plugins.'
     )
 
-    plugin_sub_parser = plugin_base_parser.add_subparsers(
+    plugin_sub_parser = plugin_parser.add_subparsers(
         title='subcommands',
         dest='subcommand',
         required=True,
@@ -35,7 +35,7 @@ class PluginCommandSet(CommandSet):
     load_parser = plugin_sub_parser.add_parser('load', help='The name of the plugin file to load (e.g., aws_plugin)')
     load_parser.add_argument('plugin_name', help='The name of the plugin file to load (e.g., aws_plugin)')
     
-    @with_argparser(plugin_base_parser)
+    @with_argparser(plugin_parser)
     def do_plugin(self, args: argparse.Namespace):
         """Manage plugins (load, unload, show)."""
         # Route execution to internal handlers
@@ -47,7 +47,7 @@ class PluginCommandSet(CommandSet):
         
         handler = subcommand_map.get(args.subcommand)
         if handler:
-            handler(args) 
+            handler(args)
 
     def do_load(self, load_parser: cmd2.Statement):
         """Internal method to load a plugin. Used by both CLI and startup."""
