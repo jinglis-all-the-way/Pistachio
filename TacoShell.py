@@ -52,11 +52,11 @@ class PluginCommandSet(CommandSet):
     def do_load(self, plugin_name: cmd2.Statement):
         """Internal method to load a plugin. Used by both CLI and startup."""
         if plugin_name in self.loaded_plugins:
-            self.poutput(f"Error: Plugin '{plugin_name}' is already loaded.")
+            self._cmd.poutput(f"Error: Plugin '{plugin_name}' is already loaded.")
             return
             
         try:
-            self.poutput(f"Attempting to import module: 'plugins.{plugin_name}'...")
+            self._cmd.poutput(f"Attempting to import module: 'plugins.{plugin_name}'...")
             module = importlib.import_module(f"plugins.{plugin_name}")
             
             for _, obj in inspect.getmembers(module, inspect.isclass):
@@ -72,7 +72,7 @@ class PluginCommandSet(CommandSet):
                 # Check if this plugin wants to be the default handler
                 is_default_handler = plugin_instance.default
                 if is_default_handler and self.default_handler_plugin is not None:
-                    self.poutput(f"Error: Cannot load '{plugin_instance.name}' because another plugin ('{self.default_handler_plugin}') has already registered a default command handler.")
+                    self._cmd.poutput(f"Error: Cannot load '{plugin_instance.name}' because another plugin ('{self.default_handler_plugin}') has already registered a default command handler.")
                     return
 
                 # Register commands by copying do_* methods to shell instance
@@ -83,26 +83,26 @@ class PluginCommandSet(CommandSet):
                             setattr(self, method_name, method)
                 
                 self.loaded_plugins[plugin_instance.name] = plugin_instance
-                self.poutput(f"Successfully loaded plugin '{plugin_instance.name}'.")
+                self._cmd.poutput(f"Successfully loaded plugin '{plugin_instance.name}'.")
 
                 # If it's a default handler, register it
                 if is_default_handler:
                     self.default = plugin_instance.default
                     self.default_handler_plugin = plugin_instance.name
-                    self.poutput(f"Plugin '{plugin_instance.name}' has registered as the default command handler.")
+                    self._cmd.poutput(f"Plugin '{plugin_instance.name}' has registered as the default command handler.")
                 return # Exit after successful load
     
         except Exception as e:
             # --- CATCH-ALL EXCEPTION FOR MAXIMUM DIAGNOSIS ---
             import traceback
-            self.poutput("\n" + "="*60)
-            self.poutput("--- AN UNEXPECTED AND CRITICAL ERROR OCCURRED DURING PLUGIN LOAD ---")
-            self.poutput(f"Python Exception Type: {type(e).__name__}")
-            self.poutput(f"Python Error Message: {e}")
-            self.poutput("\n--- FULL TRACEBACK ---")
+            self._cmd.poutput("\n" + "="*60)
+            self._cmd.poutput("--- AN UNEXPECTED AND CRITICAL ERROR OCCURRED DURING PLUGIN LOAD ---")
+            self._cmd.poutput(f"Python Exception Type: {type(e).__name__}")
+            self._cmd.poutput(f"Python Error Message: {e}")
+            self._cmd.poutput("\n--- FULL TRACEBACK ---")
             # This prints the full, detailed error stack trace
-            self.poutput(traceback.format_exc())
-            self.poutput("="*60 + "\n")
+            self._cmd.poutput(traceback.format_exc())
+            self._cmd.poutput("="*60 + "\n")
 
     @cmd2.with_argparser(plugin_parser)
     def do_plugin_load(self, args: argparse.Namespace):
@@ -116,7 +116,7 @@ class PluginCommandSet(CommandSet):
     def do_plugin_unload(self, args: argparse.Namespace):
         """Unloads a plugin, removing its commands and default handler."""
         if args.plugin_name not in self.loaded_plugins:
-            self.poutput(f"Error: Plugin '{args.plugin_name}' is not currently loaded.")
+            self._cmd.poutput(f"Error: Plugin '{args.plugin_name}' is not currently loaded.")
             return
 
         plugin_instance = self.loaded_plugins[args.plugin_name]
@@ -131,32 +131,32 @@ class PluginCommandSet(CommandSet):
         if self.default_handler_plugin == args.plugin_name:
             self.default = self.__class__.default.__get__(self, self.__class__)
             self.default_handler_plugin = None
-            self.poutput(f"Unregistered default command handler from plugin '{args.plugin_name}'.")
+            self._cmd.poutput(f"Unregistered default command handler from plugin '{args.plugin_name}'.")
 
         del self.loaded_plugins[args.plugin_name]
-        self.poutput(f"Plugin '{args.plugin_name}' unloaded successfully.")
+        self._cmd.poutput(f"Plugin '{args.plugin_name}' unloaded successfully.")
 
     def do_plugin_list(self, _: cmd2.Statement):
         """Lists available plugins in the 'plugins' directory and shows which are loaded."""
-        self.poutput("\n--- Loaded Plugins ---")
+        self._cmd.poutput("\n--- Loaded Plugins ---")
         if not self.loaded_plugins:
-            self.poutput("  No plugins are currently loaded.")
+            self._cmd.poutput("  No plugins are currently loaded.")
         else:
             for name in sorted(self.loaded_plugins.keys()):
-                self.poutput(f"  - {name}")
+                self._cmd.poutput(f"  - {name}")
 
-        self.poutput("\n--- Available Plugins ---")
+        self._cmd.poutput("\n--- Available Plugins ---")
         try:
             # Use pkgutil to find all modules in the 'plugins' package
             available = [name for _, name, _ in pkgutil.iter_modules(['plugins'])]
             if not available:
-                self.poutput("  No plugins found in the 'plugins' directory.")
+                self._cmd.poutput("  No plugins found in the 'plugins' directory.")
             else:
                 for name in sorted(available):
                     status = "(loaded)" if name in self.loaded_plugins else ""
-                    self.poutput(f"  - {name} {status}")
+                    self._cmd.poutput(f"  - {name} {status}")
         except ImportError:
-            self.poutput("  Error: 'plugins' directory not found or is not a valid package (missing __init__.py?).")
+            self._cmd.poutput("  Error: 'plugins' directory not found or is not a valid package (missing __init__.py?).")
     
     def _parse_plugin_args(self, arg_list: List[str]) -> Dict[str, Union[str, bool]]:
         """A simple key-value parser for plugin arguments like --key value."""
@@ -205,7 +205,7 @@ class TacoShell(cmd2.Cmd):
 
     def default(self, statement: cmd2.Statement) -> Union[bool, None]:
         """The shell's own default handler, for when no plugin is loaded."""
-        self.poutput(f"Error: Command '{statement.command}' not found. No default handler plugin is loaded.")
+        self._cmd.poutput(f"Error: Command '{statement.command}' not found. No default handler plugin is loaded.")
         return False
 
 def cli():
