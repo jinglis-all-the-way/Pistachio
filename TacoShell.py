@@ -40,7 +40,7 @@ class PluginCommandSet(CommandSet):
         """Manage plugins (load, unload, show)."""
         # Route execution to internal handlers
         subcommand_map = {
-            'load': self.do_load(load_parser=self.load_parser),
+            'load': self.do_load(plugin_name=self.load_parser),
             'unload': self._handle_unload,
             'show': self._handle_show
         }
@@ -49,7 +49,7 @@ class PluginCommandSet(CommandSet):
         if handler:
             handler(args)
 
-    def do_load(self, load_parser: cmd2.Statement):
+    def do_load(self, plugin_name: cmd2.Statement):
         """Internal method to load a plugin. Used by both CLI and startup."""
         if plugin_name in self.loaded_plugins:
             self.poutput(f"Error: Plugin '{plugin_name}' is already loaded.")
