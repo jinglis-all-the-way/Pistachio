@@ -2,17 +2,16 @@ import argparse
 import cmd2
 from typing import List, Optional
 
-#from plugin_interface import BasePlugin
+from plugin_interface import BasePlugin
 from lib.aws_instances import InstanceGroup
 from lib.aws_commands import SimpleCommandHandler
 
 
-class AWSPlugin(cmd2.CommandSet):
-    """
-    This is a 'mixin' class for cmd2. It provides all AWS-related commands
-    and functionality to the main shell.
-    """
+class AWSPlugin(BasePlugin, cmd2.CommandSet):
+    """AWS plugin for TacoShell providing instance and command management."""
+    
     def __init__(self, initial_instances: Optional[List[str]] = None):
+        super().__init__()
         self._instance_group = InstanceGroup(initial_instances=initial_instances)
         self._command_handler = SimpleCommandHandler()
         self._shell: Optional[cmd2.Cmd] = None
