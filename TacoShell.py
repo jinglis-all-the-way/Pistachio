@@ -1,6 +1,6 @@
 import argparse
 import cmd2
-from cmd2 import CommandSet, with_default_category
+from cmd2 import CommandSet, with_default_category, with_argparser, Cmd2ArgumentParser
 import importlib
 import inspect
 import sys
