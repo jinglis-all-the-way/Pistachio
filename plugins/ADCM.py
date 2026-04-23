@@ -64,7 +64,7 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
         self._shell.poutput("Group management commands: add, remove, show")
 
     @cmd2.with_argparser(gadd_parser)
-    def do_group_add(self, arg_string: str):
+    def do_add(self, arg_string: str):
         """Add one or more instances to the current target group."""
         if not arg_string:
             self._shell.poutput("Usage: group add <instance_id_or_name> ...")
@@ -74,7 +74,7 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
         self._instance_group.add_instances(instance_list)
 
     @cmd2.with_argparser(gremove_parser)
-    def do_group_remove(self, arg_string: str):
+    def do_remove(self, arg_string: str):
         """Remove one or more instances from the current target group."""
         if not arg_string:
             self._shell.poutput("Usage: group remove <instance_id_or_name> ...")
@@ -83,7 +83,7 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
         self._instance_group.remove_instances(arg_string.split())
 
     @cmd2.with_argparser(gshow_parser)
-    def do_group_show(self, arg_string: str):
+    def do_show(self, arg_string: str):
         """Show the instances currently in the target group."""
         targets = self._instance_group.get_instance_objects()
         if not targets:
