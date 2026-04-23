@@ -47,21 +47,22 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
     group_subparsers = group_parser.add_subparsers(title='subcommands', help='group subcommands')
     
     # group add subcommand
-    gadd_parser = group_subparsers.add_parser('add', nargs='+', help='One or more AWS instances by name or ID')
+    gadd_parser = group_subparsers.add_parser('add', help='One or more AWS instances by name or ID')
     
     # group remove subcommand
-    gremove_parser = group_subparsers.add_parser('remove', nargs='+', help='One or more AWS instances by name or ID')
+    gremove_parser = group_subparsers.add_parser('remove', help='One or more AWS instances by name or ID')
     
     # group show subcommand
     glist_parser = group_subparsers.add_parser('list', help='Show the current group')
 
     # --- Command Methods ---
     # These 'do_*' methods will be copied onto the main shell instance.
-    @with_parser(add_parser)
+    @with_parser(group_parser)
     def do_group(self, arg_string: str):
         """Category command for AWS group management."""
         self._shell.poutput("Group management commands: add, remove, show")
 
+    @with_parser(gadd_parser)
     def do_group_add(self, arg_string: str):
         """Add one or more instances to the current target group."""
         if not arg_string:
