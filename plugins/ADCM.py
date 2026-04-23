@@ -64,7 +64,7 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
     def do_group(self, args: argparse.Namespace) -> None:
         """Category command for AWS group management."""
         if not hasattr(args, 'func'):
-            self.poutput(args.format_help())
+            self._shell.poutput(args.format_help())
             return
         
         handler_name = args.func
