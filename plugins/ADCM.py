@@ -48,11 +48,13 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
     group_subparsers = group_parser.add_subparsers(title='subcommands', help='group subcommands')
     
     # group add subcommand
-    group_add_parser = group_subparsers.add_parser('add', help='One or more AWS instances by name or ID')
+    group_add_parser = group_subparsers.add_parser('add', help='Adds indicated instances to the target group')
+    group_add_parser.add_argument('instances', help='One or more AWS instances by name or ID')
     
     # group remove subcommand
-    group_remove_parser = group_subparsers.add_parser('remove', help='One or more AWS instances by name or ID')
-    
+    group_remove_parser = group_subparsers.add_parser('remove', help='Removes indicated instances from the target group')
+    group_remove_parser.add_argument('instances', help='One or more AWS instances by name or ID')
+
     # group show subcommand
     group_show_parser = group_subparsers.add_parser('list', help='Show the current group')
 
@@ -73,16 +75,14 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
         elif handler_name == '_handle_group_show':
             self._handle_group_show(args)
 
-    def _handle_group_add(self, arg_string: str):
+    def _handle_group_add(self, args: argparse.Namespace):
         """Add one or more instances to the current target group."""
-        if not arg_string:
-            self._shell.poutput("Usage: group add <instance_id_or_name> ...")
-            return
+        instances_to_add = args.instances if hasattr(args, 'instances') else []
         
-        instance_list = arg_string.split()
+        instance_list = instances_to_add.split()
         self._instance_group.add_instances(instance_list)
 
-    def _handle_group_remove(self, arg_string: str):
+    def _handle_group_remove(self, args: argparse.Namespace):
         """Remove one or more instances from the current target group."""
         if not arg_string:
             self._shell.poutput("Usage: group remove <instance_id_or_name> ...")
@@ -90,7 +90,7 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
 
         self._instance_group.remove_instances(arg_string.split())
 
-    def _handle_group_show(self, arg_string: str):
+    def _handle_group_show(self, args: argparse.Namespace):
         """Show the instances currently in the target group."""
         targets = self._instance_group.get_instance_objects()
         if not targets:
