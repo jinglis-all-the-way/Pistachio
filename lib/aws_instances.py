@@ -114,12 +114,27 @@ class AwsInstance:
         root_vol_id = get_root_volume_id()
         try:
             print(f"[*] Initiating snapshots for instance: {self.iid}")
-            response = ec2.create_snapshots(
+            response = self.ec2_client.create_snapshots(
                 InstanceSpecification={
                     'InstanceId': self.iid
                 },
                 Description=snapshot_description,
                 CopyTagsFromSource='volume'
+                TagSpecifications=[          # 2. Append these new tags to the snapshot
+                    {
+                        'ResourceType': 'snapshot',
+                        'Tags': [
+                            {
+                                'Key': 'OriginalInstanceID', 
+                                'Value': instance_id
+                            },
+                            {
+                                'Key': 'SnapshotType', 
+                                'Value': 'Manual/Script_generated'
+                            }
+                        ]
+                    }
+                ]
             )
             results.append(response)
             print(f"[+] Success: Created snapshots for {instance_id}")
