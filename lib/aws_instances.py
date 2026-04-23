@@ -119,7 +119,7 @@ class AwsInstance:
                     'InstanceId': self.iid
                 },
                 Description=snapshot_description,
-                CopyTagsFromSource='volume'
+                CopyTagsFromSource='volume',
                 TagSpecifications=[          # 2. Append these new tags to the snapshot
                     {
                         'ResourceType': 'snapshot',
