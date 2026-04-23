@@ -53,16 +53,16 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
     gremove_parser = group_subparsers.add_parser('remove', help='One or more AWS instances by name or ID')
     
     # group show subcommand
-    glist_parser = group_subparsers.add_parser('list', help='Show the current group')
+    gshow_parser = group_subparsers.add_parser('list', help='Show the current group')
 
     # --- Command Methods ---
     # These 'do_*' methods will be copied onto the main shell instance.
-    @cmd2.with_parser(group_parser)
+    @cmd2.with_argparser(group_parser)
     def do_group(self, arg_string: str):
         """Category command for AWS group management."""
         self._shell.poutput("Group management commands: add, remove, show")
 
-    @cmd2.with_parser(gadd_parser)
+    @cmd2.with_argparser(gadd_parser)
     def do_group_add(self, arg_string: str):
         """Add one or more instances to the current target group."""
         if not arg_string:
@@ -72,6 +72,7 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
         instance_list = arg_string.split()
         self._instance_group.add_instances(instance_list)
 
+    @cmd2.with_argparser(gremove_parser)
     def do_group_remove(self, arg_string: str):
         """Remove one or more instances from the current target group."""
         if not arg_string:
@@ -80,6 +81,7 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
 
         self._instance_group.remove_instances(arg_string.split())
 
+    @cmd2.with_argparser(gshow_parser)
     def do_group_show(self, arg_string: str):
         """Show the instances currently in the target group."""
         targets = self._instance_group.get_instance_objects()
