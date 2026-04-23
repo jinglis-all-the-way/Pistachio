@@ -58,7 +58,7 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
     group_remove_parser.set_defaults(func='_handle_group_add')
 
     # group show subcommand
-    group_show_parser = group_subparsers.add_parser('list', help='Show the current group')
+    group_show_parser = group_subparsers.add_parser('Show', help='Show the current group')
     group_show_parser.set_defaults(func='_handle_group_show')
 
     # --- Command Methods ---
