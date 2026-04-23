@@ -57,12 +57,12 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
 
     # --- Command Methods ---
     # These 'do_*' methods will be copied onto the main shell instance.
-    @with_parser(group_parser)
+    @cmd2.with_parser(group_parser)
     def do_group(self, arg_string: str):
         """Category command for AWS group management."""
         self._shell.poutput("Group management commands: add, remove, show")
 
-    @with_parser(gadd_parser)
+    @cmd2.with_parser(gadd_parser)
     def do_group_add(self, arg_string: str):
         """Add one or more instances to the current target group."""
         if not arg_string:
