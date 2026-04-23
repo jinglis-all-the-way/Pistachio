@@ -45,20 +45,20 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
     # Create an argparser for commands that take a list of instances
 
     group_parser = cmd2.Cmd2ArgumentParser(description='Group management commands: add, remove, show')
-    group_subparsers = group_parser.add_subparsers(title='subcommands', help='group subcommands')
+    group_subparsers = group_parser.add_subparsers(title='subcommands', dest='subcommand', help='group subcommands')
     
     # group add subcommand
-    group_add_parser = group_subparsers.add_parser('add', dest='subcommands', help='Adds indicated instances to the target group')
+    group_add_parser = group_subparsers.add_parser('add', help='Adds indicated instances to the target group')
     group_add_parser.add_argument('instances', nargs='+', help='One or more AWS instances by name or ID')
     group_add_parser.set_defaults(func='_handle_group_add')
 
     # group remove subcommand
-    group_remove_parser = group_subparsers.add_parser('remove', dest='subcommands', help='Removes indicated instances from the target group')
+    group_remove_parser = group_subparsers.add_parser('remove', help='Removes indicated instances from the target group')
     group_remove_parser.add_argument('instances', nargs='+', help='One or more AWS instances by name or ID')
     group_remove_parser.set_defaults(func='_handle_group_add')
 
     # group show subcommand
-    group_show_parser = group_subparsers.add_parser('list', dest='subcommands', help='Show the current group')
+    group_show_parser = group_subparsers.add_parser('list', help='Show the current group')
     group_show_parser.set_defaults(func='_handle_group_show')
 
     # --- Command Methods ---
