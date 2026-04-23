@@ -13,7 +13,7 @@ class TacoShell(cmd2.Cmd):
     def __init__(self, plugin_args: Optional[argparse.Namespace] = None):
         super().__init__(allow_cli_args=False)
         self.prompt = ">> "
-        self.intro = "Taco Shell Framework. Type 'help' for commands or 'plugin_load <name>' to load a plugin."
+        self.intro = "Taco Shell Framework. Type 'help' for commands or 'plugin list' to see available plugins."
         
         # Hide unnecessary cmd2 commands
         self.hidden_commands.extend(['run_script', 'run_pyscript', '_relative_run_script'])
