@@ -14,6 +14,7 @@ class AwsInstance:
         self.ssm_client = ssm_client if ssm_client is not None else boto3.client('ssm')
         self.identifier = identifier
         self.description = None
+        self.iid = None
         self._is_valid = self._resolve()
 
     def _resolve(self) -> bool:
@@ -38,6 +39,7 @@ class AwsInstance:
                 return False
             
             self.description = instances[0]
+            self.iid = self.description.get('InstanceId')
             return True 
         except ClientError as e:
             logging.error(f"AWS API error resolving '{self.identifier}': {e}")
@@ -79,7 +81,7 @@ class AwsInstance:
         if not self._is_valid or not self.description:
             return None
             
-        return self.description.get('InstanceId')
+        return self.iid
 
     def get_name(self) -> Optional[str]:
         if not self._is_valid or not self.description:
@@ -91,7 +93,41 @@ class AwsInstance:
                 instance_name = tag.get('Value')
                 break
         return instance_name
+
+    def get_root_volume_id(self) -> Optional[str]:
+        if not self._is_valid or not self.description:
+            return None
+
+        root_device_name = self.description['RootDeviceName']
+
+        for mapping in self.description.get('BlockDeviceMappings', []):
+            if mapping['DeviceName'] == root_device_name:
+                return mapping['Ebs']['VolumeId']
+            
+        return None
+    
+    def create_snapshot(self, snapshot_description: str):
+        if not self._is_valid or not self.description:
+            return None
+
+        results = []
+        root_vol_id = get_root_volume_id()
+        try:
+            print(f"[*] Initiating snapshots for instance: {self.iid}")
+            response = ec2.create_snapshots(
+                InstanceSpecification={
+                    'InstanceId': self.iid
+                },
+                Description=snapshot_description,
+                CopyTagsFromSource='volume'
+            )
+            results.append(response)
+            print(f"[+] Success: Created snapshots for {instance_id}")
+        except ClientError as e:
+            print(f"[!] Error creating snapshots for {instance_id}: {e}")
+        return results
         
+
 class StrippedAwsInstance:
     def __init__(self, possible_identifier: str, ec2_client=None):
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
