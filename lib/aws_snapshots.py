@@ -20,7 +20,7 @@ class AwsSnapshot:
    def _create_snapshot(instance_id_or_name, description):
       print(f"Logic to create snapshot for '{instance_id_or_name}' with description '{description}' goes here.")
       # 1. Find instance.
-      # 2. Find root volume ID.
+      # 2. Find root volume ID.  
       # 3. Call ec2.create_snapshot() with tags.
       # 4. Use waiter 'snapshot_completed'.
       # 5. Report new snapshot ID.

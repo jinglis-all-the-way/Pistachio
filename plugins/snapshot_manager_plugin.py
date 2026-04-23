@@ -25,7 +25,7 @@ class SnapshotManagerPlugin(BasePlugin, cmd2.CommandSet):
         """Set the reference to the cmd2 shell instance."""
         self._shell = shell
 
-    # --- 'snapshot' Sub-commands ---
+    # --- 'snapshot' Sub-commands ---  
     
     # Create an argparser for commands that take a list of instances
 
