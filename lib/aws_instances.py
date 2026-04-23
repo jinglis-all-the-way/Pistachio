@@ -50,7 +50,7 @@ class AwsInstance:
         return self._is_valid
 
     @property
-    def is_ready(self) -> bool:
+    def is_ready_for_ssm(self) -> bool:
         """
         Checks if an instance is in a valid state to receive SSM commands.
         Returns True if the instance is running AND the SSM agent is online.
@@ -148,11 +148,11 @@ class StrippedAwsInstance:
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
         heavy_instance = AwsInstance(identifier=possible_identifier, ec2_client=self.ec2_client)
         
-        self.id = None
+        self.id = None  
         self.name = None
         self.is_valid = False
 
-        if heavy_instance.is_valid and heavy_instance.is_ready:
+        if heavy_instance.is_valid and heavy_instance.is_ready_for_ssm:
             self.id = heavy_instance.get_id()
             self.name = heavy_instance.get_name()
             self.is_valid = heavy_instance.is_valid
