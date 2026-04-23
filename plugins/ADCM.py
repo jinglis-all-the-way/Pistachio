@@ -77,14 +77,12 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
 
     def _handle_group_add(self, args: argparse.Namespace):
         """Add one or more instances to the current target group."""
-        instances_to_add = args.instances if hasattr(args, 'instances') else []
         
-        instance_list = instances_to_add.split()
-        self._instance_group.add_instances(instance_list)
+        self._instance_group.add_instances(args.instances)
 
     def _handle_group_remove(self, args: argparse.Namespace):
         """Remove one or more instances from the current target group."""
-        self._instance_group.remove_instances(args.instances.split())
+        self._instance_group.remove_instances(args.instances)
         self._shell.poutput(f"Removed: {', '.join(args.instances)}")
         
 
