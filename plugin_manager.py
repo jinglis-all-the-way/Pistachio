@@ -139,18 +139,21 @@ class PluginManager:
         base_default = getattr(BasePlugin, 'default', None)
         return plugin_default is not None and plugin_default != base_default
     
-    @staticmethod
-    def _register_commands(plugin_instance: BasePlugin) -> None:
-        """Register a plugin's do_* methods with the shell."""
-        # This is handled by the shell via CommandSet registration
-        # but we can add logic here for manual registration if needed
-        pass
     
-    @staticmethod
-    def _unregister_commands(plugin_instance: BasePlugin) -> None:
-        """Unregister a plugin's do_* methods from the shell."""
-        # Similar to above; handled via CommandSet
-        pass
+    def _register_commands(self, plugin_instance: BasePlugin) -> None:
+        """Register a plugin's CommandSet with the shell, if applicable."""
+        if isinstance(plugin_instance, cmd2.CommandSet):
+            # This is the magic step that makes cmd2 aware of the new commands
+            self.shell.register_command_set(plugin_instance)
+            self.shell.poutput(f"Successfully registered command set from '{plugin_instance.name}'.")
+    
+
+    def _unregister_commands(self, plugin_instance: BasePlugin) -> None:
+        """Unregister a plugin's CommandSet from the shell."""
+        if isinstance(plugin_instance, cmd2.CommandSet):
+            # This is the crucial cleanup step
+            self.shell.unregister_command_set(plugin_instance)
+            self.shell.poutput(f"Successfully unregistered command set from '{plugin_instance.name}'.")
     
     @staticmethod
     def _parse_plugin_args(arg_list: List[str]) -> Dict[str, Union[str, bool]]:
