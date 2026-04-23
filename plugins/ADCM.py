@@ -2,17 +2,17 @@ import argparse
 import cmd2
 from typing import List, Optional
 
-#from plugin_interface import BasePlugin
+from plugin_interface import BasePlugin
 from lib.aws_instances import InstanceGroup
 from lib.aws_commands import SimpleCommandHandler
 
 
-class AWSPlugin(cmd2.CommandSet):
-    """
-    This is a 'mixin' class for cmd2. It provides all AWS-related commands
-    and functionality to the main shell.
-    """
+class AWSPlugin(BasePlugin, cmd2.CommandSet):
+    """AWS plugin for TacoShell providing instance and command management."""
+    
     def __init__(self, initial_instances: Optional[List[str]] = None):
+        BasePlugin.__init__(self)
+        cmd2.CommandSet.__init__(self)
         self._instance_group = InstanceGroup(initial_instances=initial_instances)
         self._command_handler = SimpleCommandHandler()
         self._shell: Optional[cmd2.Cmd] = None
@@ -43,34 +43,50 @@ class AWSPlugin(cmd2.CommandSet):
     # --- 'group' Sub-commands ---
     
     # Create an argparser for commands that take a list of instances
-    instance_parser = argparse.ArgumentParser()
-    instance_parser.add_argument('instances', nargs='+', help='One or more instance names or IDs')
+
+    group_parser = cmd2.Cmd2ArgumentParser(description='Group management. Use this command to add, remove, or show the current target group.\nAll non-builtin commands will be ran on the target group via AWS SSM')
+    group_subparsers = group_parser.add_subparsers(title='subcommands', dest='subcommand', help='group subcommands')
     
+    # group add subcommand
+    group_add_parser = group_subparsers.add_parser('add', help='Adds indicated instances to the target group')
+    group_add_parser.add_argument('instances', nargs='+', help='One or more AWS instances by name or ID')
+    group_add_parser.set_defaults(func='_handle_group_add')
+
+    # group remove subcommand
+    group_remove_parser = group_subparsers.add_parser('remove', help='Removes indicated instances from the target group')
+    group_remove_parser.add_argument('instances', nargs='+', help='One or more AWS instances by name or ID')
+    group_remove_parser.set_defaults(func='_handle_group_remove')
+
+    # group show subcommand
+    group_show_parser = group_subparsers.add_parser('show', help='Show the current group')
+    group_show_parser.set_defaults(func='_handle_group_show')
+
     # --- Command Methods ---
     # These 'do_*' methods will be copied onto the main shell instance.
-
-    def do_group(self, arg_string: str):
+    @cmd2.with_argparser(group_parser)
+    def do_group(self, args: argparse.Namespace) -> None:
         """Category command for AWS group management."""
-        self._shell.poutput("Group management commands: add, remove, show")
+        # If a subcommand was used, args.func will be set by set_defaults()
+        if hasattr(args, 'func'):
+            # Get the handler method from this class by its name and call it
+            handler = getattr(self, args.func)
+            handler(args)
+        else:
+            # No subcommand was provided, so print the help for the main 'group' command
+            self._shell.poutput(self.group_parser.format_help())
 
-    def do_group_add(self, arg_string: str):
+    def _handle_group_add(self, args: argparse.Namespace):
         """Add one or more instances to the current target group."""
-        if not arg_string:
-            self._shell.poutput("Usage: group add <instance_id_or_name> ...")
-            return
         
-        instance_list = arg_string.split()
-        self._instance_group.add_instances(instance_list)
+        self._instance_group.add_instances(args.instances)
 
-    def do_group_remove(self, arg_string: str):
+    def _handle_group_remove(self, args: argparse.Namespace):
         """Remove one or more instances from the current target group."""
-        if not arg_string:
-            self._shell.poutput("Usage: group remove <instance_id_or_name> ...")
-            return
+        self._instance_group.remove_instances(args.instances)
+        self._shell.poutput(f"Removed: {', '.join(args.instances)}")
+        
 
-        self._instance_group.remove_instances(arg_string.split())
-
-    def do_group_show(self, arg_string: str):
+    def _handle_group_show(self, args: argparse.Namespace):
         """Show the instances currently in the target group."""
         targets = self._instance_group.get_instance_objects()
         if not targets:
