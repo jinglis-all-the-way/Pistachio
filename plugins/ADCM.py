@@ -11,7 +11,8 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
     """AWS plugin for TacoShell providing instance and command management."""
     
     def __init__(self, initial_instances: Optional[List[str]] = None):
-        super().__init__()
+        BasePlugin.__init__(self)
+        cmd2.CommandSet.__init__(self)
         self._instance_group = InstanceGroup(initial_instances=initial_instances)
         self._command_handler = SimpleCommandHandler()
         self._shell: Optional[cmd2.Cmd] = None
