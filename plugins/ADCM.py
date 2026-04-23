@@ -55,7 +55,7 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
     # group remove subcommand
     group_remove_parser = group_subparsers.add_parser('remove', help='Removes indicated instances from the target group')
     group_remove_parser.add_argument('instances', nargs='+', help='One or more AWS instances by name or ID')
-    group_remove_parser.set_defaults(func='_handle_group_add')
+    group_remove_parser.set_defaults(func='_handle_group_remove')
 
     # group show subcommand
     group_show_parser = group_subparsers.add_parser('show', help='Show the current group')
