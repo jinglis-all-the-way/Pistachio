@@ -48,32 +48,32 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
     group_subparsers = group_parser.add_subparsers(title='subcommands', help='group subcommands')
     
     # group add subcommand
-    group_add_parser = group_subparsers.add_parser('add', help='Adds indicated instances to the target group')
-    group_add_parser.add_argument('instances', help='One or more AWS instances by name or ID')
-    
+    group_add_parser = group_subparsers.add_parser('add', dest='subcommands', help='Adds indicated instances to the target group')
+    group_add_parser.add_argument('instances', nargs='+', help='One or more AWS instances by name or ID')
+    group_add_parser.set_defaults(func='_handle_group_add')
+
     # group remove subcommand
-    group_remove_parser = group_subparsers.add_parser('remove', help='Removes indicated instances from the target group')
-    group_remove_parser.add_argument('instances', help='One or more AWS instances by name or ID')
+    group_remove_parser = group_subparsers.add_parser('remove', dest='subcommands', help='Removes indicated instances from the target group')
+    group_remove_parser.add_argument('instances', nargs='+', help='One or more AWS instances by name or ID')
+    group_remove_parser.set_defaults(func='_handle_group_add')
 
     # group show subcommand
-    group_show_parser = group_subparsers.add_parser('list', help='Show the current group')
+    group_show_parser = group_subparsers.add_parser('list', dest='subcommands', help='Show the current group')
+    group_show_parser.set_defaults(func='_handle_group_show')
 
     # --- Command Methods ---
     # These 'do_*' methods will be copied onto the main shell instance.
     @cmd2.with_argparser(group_parser)
     def do_group(self, args: argparse.Namespace) -> None:
         """Category command for AWS group management."""
-        if not hasattr(args, 'func'):
-            self._shell.poutput(args.format_help())
-            return
-        
-        handler_name = args.func
-        if handler_name == '_handle_group_add':
-            self._handle_group_add(args)
-        elif handler_name == '_handle_group_remove':
-            self._handle_group_remove(args)
-        elif handler_name == '_handle_group_show':
-            self._handle_group_show(args)
+        # If a subcommand was used, args.func will be set by set_defaults()
+        if hasattr(args, 'func'):
+            # Get the handler method from this class by its name and call it
+            handler = getattr(self, args.func)
+            handler(args)
+        else:
+            # No subcommand was provided, so print the help for the main 'group' command
+            self._shell.poutput(self.group_parser.format_help())
 
     def _handle_group_add(self, args: argparse.Namespace):
         """Add one or more instances to the current target group."""
@@ -84,11 +84,9 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
 
     def _handle_group_remove(self, args: argparse.Namespace):
         """Remove one or more instances from the current target group."""
-        if not arg_string:
-            self._shell.poutput("Usage: group remove <instance_id_or_name> ...")
-            return
-
-        self._instance_group.remove_instances(arg_string.split())
+        self._instance_group.remove_instances(args.instances.split())
+        self._shell.poutput(f"Removed: {', '.join(args.instances)}")
+        
 
     def _handle_group_show(self, args: argparse.Namespace):
         """Show the instances currently in the target group."""
