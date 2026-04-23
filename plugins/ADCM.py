@@ -44,7 +44,7 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
     
     # Create an argparser for commands that take a list of instances
 
-    group_parser = cmd2.Cmd2ArgumentParser(description='Group management. Use this command to add, remove, or show the current target group.\n All non-builtin commands will be ran on the target group via AWS SSM')
+    group_parser = cmd2.Cmd2ArgumentParser(description='Group management. Use this command to add, remove, or show the current target group.\nAll non-builtin commands will be ran on the target group via AWS SSM')
     group_subparsers = group_parser.add_subparsers(title='subcommands', dest='subcommand', help='group subcommands')
     
     # group add subcommand
