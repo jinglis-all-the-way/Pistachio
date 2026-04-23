@@ -1,5 +1,6 @@
 """Plugin management system for TacoShell."""
 import importlib
+import cmd2
 import inspect
 import pkgutil
 import sys
