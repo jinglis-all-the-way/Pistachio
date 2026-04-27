@@ -38,7 +38,7 @@ TacoShell comes bundled with a powerful plugin for managing AWS resources: the *
 ### Usage
 
 **1. Load the Plugin**
-```bash
+```
 >> plugin load ADCM
 ```
 
