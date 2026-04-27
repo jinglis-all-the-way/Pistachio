@@ -1,7 +1,6 @@
 import argparse
 import cmd2
 from typing import List, Optional
-
 from plugin_interface import BasePlugin
 from lib.aws_instances import InstanceGroup
 from lib.aws_commands import SimpleCommandHandler

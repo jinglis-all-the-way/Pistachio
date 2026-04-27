@@ -1,0 +1,134 @@
+# TacoShell: The Extensible Python Command Shell
+
+TacoShell is a lightweight, powerful, and extensible command-line shell framework built in Python. It leverages the `cmd2` library to provide a rich terminal experience and features a dynamic plugin management system that allows for easy extension of its core capabilities.
+
+The primary goal of TacoShell is to provide a solid foundation for building specialized command-line tools. Its plugin-based architecture means you can add complex new features without ever modifying the core shell code.
+
+
+
+---
+
+## Features
+
+*   **Dynamic Plugin Management**: Load and unload plugins on the fly without restarting the shell.
+*   **Rich Command-Line Experience**: Built on `cmd2`, it includes features like command history, tab completion, and detailed help text.
+*   **Extensible by Design**: A simple `BasePlugin` interface makes it easy to create new plugins.
+*   **Powerful Argument Parsing**: Utilizes `argparse` for robust and user-friendly command argument handling.
+*   **Included `ADCM` Plugin**: Comes with the **AWS Distributed Command Manager** (`ADCM`) plugin for managing and executing commands across a group of AWS EC2 instances using Amazon's boto3 ssm api.
+
+---
+
+## Core Components
+
+The project is broken down into several key components that work together:
+
+| File / Directory | Description |
+| :--- | :--- |
+| **`TacoShell.py`** | The main entry point and core shell application. It initializes `cmd2` and the `PluginManager`. |
+| **`plugin_manager.py`** | The heart of the plugin system. It handles loading, unloading, registering, and unregistering plugins. |
+| **`plugin_interface.py`**| Defines the `BasePlugin` abstract class that all plugins must inherit from. |
+| **`plugins/`** | The directory where all plugins are stored. The `PluginManager` automatically discovers plugins placed here. |
+
+---
+
+## The ADCM Plugin
+
+TacoShell comes bundled with a powerful plugin for managing AWS resources: the **AWS Distributed Command Manager (ADCM)**. This plugin allows you to define a group of target EC2 instances and execute shell commands on all of them simultaneously.
+
+### Usage
+
+**1. Load the Plugin**
+```bash
+>> plugin load ADCM
+```
+
+**2. Manage the Instance Group**
+The `group` command allows you to control which instances are in your target group.
+
+*   **Add Instances:**
+    You can add one or more instances by their name or ID.
+    ```
+    >> group add my-cool-instance-name i-9876543210zyxwvu1
+    ```
+
+*   **Show Instances:**
+    See which instances are currently in your target group.
+    ```
+    >> group show
+    Current target instances:
+      - my-cool-instance-name (i-0123456789abcdef0)
+      - my-other-cool-instance-name (i-9876543210zyxwvu1)
+    ```
+
+*   **Remove Instances:**
+    ```
+    >> group remove i-0123456789abcdef0
+    ```
+
+**3. Execute Commands on the Group**
+Any command that is not a built-in shell command (like `help`, `plugin`, or `group`) will be automatically passed to the ADCM plugin and executed on all instances in the current target group.
+
+```bash
+# Check the uptime on all instances in the group
+>> uptime
+
+# List the contents of /var/log on all instances
+>> ls -l /var/log
+```
+
+---
+
+## Getting Started
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <your-repo-url>
+    cd <your-repo-directory>
+    ```
+
+2.  **Install dependencies:**
+    Make sure you have `cmd2` and any other required libraries installed.
+    ```bash
+    pip install cmd2
+    ```
+
+3.  **Run the shell:**
+    ```bash
+    python TacoShell.py
+    ```
+
+4.  **Start using commands:**
+    Type `help` to see a list of available commands. Use `plugin load ADCM` to get started with the AWS functionality.
+
+---
+
+## Creating Your Own Plugins
+
+Creating a new plugin is straightforward.
+
+1.  **Create a Python file** in the `plugins/` directory (e.g., `my_plugin.py`).
+2.  **Inherit from `BasePlugin`**: Your main plugin class must inherit from `BasePlugin`.
+3.  **Inherit from `cmd2.CommandSet` (Optional)**: If you want to add new `do_*` commands to the shell, you must also inherit from `cmd2.CommandSet` and call both parent `__init__` methods.
+4.  **Implement the `name` property**: This must return a unique name for your plugin.
+5.  **Add `do_*` methods**: For each command you want to add to the shell, create a `do_<command_name>` method. Use the `@cmd2.with_argparser` decorator for easy argument handling.
+
+### Example Plugin (`my_plugin.py`)
+```python
+import cmd2
+from plugin_interface import BasePlugin
+
+class MyPlugin(BasePlugin, cmd2.CommandSet):
+    def __init__(self):
+        # Initialize both parent classes
+        BasePlugin.__init__(self)
+        cmd2.CommandSet.__init__(self)
+
+    @property
+    def name(self) -> str:
+        return "MyAwesomePlugin"
+
+    def do_hello(self, statement: cmd2.Statement):
+        """A simple hello world command."""
+        self._shell.poutput(f"Hello, {statement.args or 'world'}!")
+
+```
