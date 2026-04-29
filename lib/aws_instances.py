@@ -8,7 +8,7 @@ import time
 import logging
 from typing import List, Optional, Dict, Any, Set
 
-class AwsInstance:
+class AwsEc2Instance:
     def __init__(self, identifier: str, ec2_client=None, ssm_client=None):
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
         self.ssm_client = ssm_client if ssm_client is not None else boto3.client('ssm')
@@ -142,25 +142,18 @@ class AwsInstance:
             print(f"[!] Error creating snapshots for {instance_id}: {e}")
         return results
         
-
 class StrippedAwsInstance:
     def __init__(self, possible_identifier: str, ec2_client=None):
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
-        heavy_instance = AwsInstance(identifier=possible_identifier, ec2_client=self.ec2_client)
+        source_instance = AwsEc2Instance(identifier=possible_identifier, ec2_client=self.ec2_client)
         
         self.id = None  
         self.name = None
         self.is_valid = False
 
-        if heavy_instance.is_valid and heavy_instance.is_ready_for_ssm:
-            self.id = heavy_instance.get_id()
-            self.name = heavy_instance.get_name()
-            self.is_valid = heavy_instance.is_valid
-
-    
     # --- Essential methods for list/set operations ---
     def __eq__(self, other):
-        if not isinstance(other, StrippedAwsInstance):
+        if not isinstance(other, __class__):
             return NotImplemented
         
         # If both instances are valid, compare their IDs.
@@ -182,9 +175,9 @@ class StrippedAwsInstance:
 
     def __repr__(self):
         if self.is_valid:
-            return f"StrippedAwsInstance(id='{self.id}', name='{self.name}')"
+            return f"{__class__}(id='{self.id}', name='{self.name}')"
         else:
-            return f"StrippedAwsInstance(invalid_identifier='{self.identifier}')"
+            return f"{__class__}(invalid_identifier='{self.identifier}')"
             
 class InstanceGroup:
     def __init__(self, ec2_client=None, initial_instances: Optional[List[str]] = None): 
