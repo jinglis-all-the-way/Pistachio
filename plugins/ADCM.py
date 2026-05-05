@@ -104,7 +104,7 @@ class SsmCommandHandler():
         else:
             logging.error(f"Execution failed: no command_id returned for command '{command_string}'.")
 
-class AWSPlugin(BasePlugin, cmd2.CommandSet):
+class AWSDistributedCommandPlugin(BasePlugin, cmd2.CommandSet):
     """AWS plugin for TacoShell providing instance and command management."""
     
     def __init__(self, initial_instances: Optional[List[str]] = None):

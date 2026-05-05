@@ -9,17 +9,52 @@ from botocore.exceptions import ClientError
 import time
 import logging
 from typing import List, Optional, Dict, Any
-from aws_instances import AwsInstance
+from aws_instances import StrippedAwsInstance
 
 
-class AwsSnapshot(AwsInstance):
+class AwsSnapshotInstance(StrippedAwsInstance):
    def __init__(self):
        self.snapshot_id = snapshot_id
        self.target_instance = target_instance
        
-    # --- Helper Functions (where you'll write the Boto3 logic) ---
+    # --- Helper Functions ---
 
    
+   def create_snapshot(self, snapshot_description: str):
+        if not self._is_valid or not self.description:
+            return None
+
+        results = []
+        root_vol_id = get_root_volume_id()
+        try:
+            print(f"[*] Initiating snapshots for instance: {self.iid}")
+            response = self.ec2_client.create_snapshots(
+                InstanceSpecification={
+                    'InstanceId': self.iid
+                },
+                Description=snapshot_description,
+                CopyTagsFromSource='volume',
+                TagSpecifications=[          # 2. Append these new tags to the snapshot
+                    {
+                        'ResourceType': 'snapshot',
+                        'Tags': [
+                            {
+                                'Key': 'OriginalInstanceID', 
+                                'Value': instance_id
+                            },
+                            {
+                                'Key': 'SnapshotType', 
+                                'Value': 'Manual/Script_generated'
+                            }
+                        ]
+                    }
+                ]
+            )
+            results.append(response)
+            print(f"[+] Success: Created snapshots for {instance_id}")
+        except ClientError as e:
+            print(f"[!] Error creating snapshots for {instance_id}: {e}")
+        return results
 
    def _list_snapshots(max_items):
       print(f"Logic to list the last {max_items} snapshots created by this tool goes here.")
