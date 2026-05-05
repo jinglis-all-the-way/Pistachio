@@ -154,7 +154,7 @@ class AwsEc2Instance:
 class StrippedAwsInstance:
     def __init__(self, possible_identifier: str, ec2_client=None):
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
-        self.possible_identifier
+        self.possible_identifier = possible_identifier
         self.source_instance = AwsEc2Instance(identifier=self.possible_identifier, ec2_client=self.ec2_client)
         self.id = None  
         self.name = None
@@ -172,17 +172,17 @@ class StrippedAwsInstance:
 
     # --- Essential methods for list/set operations ---
     def __eq__(self, other):
-        if not isinstance(other, __class__):
+        if not isinstance(other, self.__class__):
             return NotImplemented
         
         # If both instances are valid, compare their IDs.
         if self.is_valid and other.is_valid:
             return self.id == other.id
         
-        # If both instances are invalid, they are considered equal.
+        # If both are invalid, compare by the identifier string they were created with.
         if not self.is_valid and not other.is_valid:
-            return True
-            
+            return self.possible_identifier == other.possible_identifier
+
         # If one is valid and the other is not, they are not equal.
         return False
 
@@ -194,9 +194,9 @@ class StrippedAwsInstance:
 
     def __repr__(self):
         if self.is_valid:
-            return f"{__class__}(id='{self.id}', name='{self.name}')"
+            return f"{self.__class__.__name__}(id='{self.id}', name='{self.name}')"
         else:
-            return f"{__class__}(invalid_identifier='{self.possible_identifier}')"
+            return f"{self.__class__.__name__}(invalid_identifier='{self.possible_identifier}')"
 
             
 class InstanceGroup:
