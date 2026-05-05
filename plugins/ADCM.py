@@ -10,7 +10,7 @@ import cmd2
 import json
 import time
 import logging
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Set
 
 # local imports
 from plugin_interface import BasePlugin
