@@ -145,8 +145,8 @@ class AwsEc2Instance:
 class StrippedAwsInstance:
     def __init__(self, possible_identifier: str, ec2_client=None):
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
-        source_instance = AwsEc2Instance(identifier=possible_identifier, ec2_client=self.ec2_client)
-        
+        self.possible_identifier
+        self.source_instance = AwsEc2Instance(identifier=self.possible_identifier, ec2_client=self.ec2_client)
         self.id = None  
         self.name = None
         self.is_valid = False
@@ -171,13 +171,13 @@ class StrippedAwsInstance:
         if self.is_valid:
             return hash(self.id)
         else:
-            return hash(self.identifier)
+            return hash(self.possible_identifier)
 
     def __repr__(self):
         if self.is_valid:
             return f"{__class__}(id='{self.id}', name='{self.name}')"
         else:
-            return f"{__class__}(invalid_identifier='{self.id}')"
+            return f"{__class__}(invalid_identifier='{self.possible_identifier}')"
 
             
 class InstanceGroup:

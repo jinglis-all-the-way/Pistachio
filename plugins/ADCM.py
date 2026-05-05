@@ -21,9 +21,9 @@ class SsmInstance(StrippedAwsInstance):
     def __init__():
         super().__init__()
 
-        if source_instance.is_valid and source_instance.is_ready_for_ssm:
-            self.id = source_instance.get_id()
-            self.name = source_instance.get_name()
+        if self.source_instance.is_valid and self.source_instance.is_ready_for_ssm:
+            self.id = self.source_instance.get_id()
+            self.name = self.source_instance.get_name()
             self.is_valid = True
 
 class SsmInstanceGroup(InstanceGroup):
