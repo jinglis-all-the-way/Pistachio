@@ -158,6 +158,16 @@ class StrippedAwsInstance:
         self.source_instance = AwsEc2Instance(identifier=self.possible_identifier, ec2_client=self.ec2_client)
         self.id = None  
         self.name = None
+        self.state = None
+        self.os = None
+        self.cpu_count = None
+        self.ram_count = None
+        self.block_storage_devices = None
+        self.total_storage = None
+        self.internal_ip = None
+        self.additional_internal_ips = None
+        self.external_ip = None
+        self.additional_external_ips = None
         self.is_valid = False
 
     # --- Essential methods for list/set operations ---
