@@ -110,8 +110,10 @@ class AWSPlugin(BasePlugin, cmd2.CommandSet):
     def __init__(self, initial_instances: Optional[List[str]] = None):
         BasePlugin.__init__(self)
         cmd2.CommandSet.__init__(self)
-        self._instance_group = InstanceGroup(initial_instances=initial_instances)
-        self._command_handler = SimpleCommandHandler()
+        self.ec2_client = boto3.client('ec2')
+        self.ssm_client = boto3.client('ssm')
+        self._instance_group = SsmInstanceGroup(ec2_client=self.ec2_client, initial_instances=initial_instances)
+        self._command_handler = SsmCommandHandler(ssm_client=self.ssm_client)
         self._shell: Optional[cmd2.Cmd] = None
         print("AWS Distributed Command Manager Plugin Loaded.")
 
