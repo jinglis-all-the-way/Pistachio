@@ -19,11 +19,22 @@ from lib.aws_instances import StrippedAwsInstance, InstanceGroup
 
 class SsmInstance(StrippedAwsInstance):
     def __init__():
+        super().__init__()
+
         if source_instance.is_valid and source_instance.is_ready_for_ssm:
             self.id = source_instance.get_id()
             self.name = source_instance.get_name()
             self.is_valid = True
 
+class SsmInstanceGroup(InstanceGroup):
+    def __init__(self, ec2_client=None, initial_instances: Optional[List[str]] = None):
+        self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
+        super().__init__(ec2_client=self.ec2_client)
+        self._instances: Set[SsmInstance] = set()
+
+    def get_instance_objects(self) -> Set[SsmInstance]:
+        """Returns the set of stored StrippedAwsInstance objects for display."""
+        return self._instances
 
 class SsmCommandHandler():
     def __init__(self, ssm_client=None):

@@ -177,13 +177,15 @@ class StrippedAwsInstance:
         if self.is_valid:
             return f"{__class__}(id='{self.id}', name='{self.name}')"
         else:
-            return f"{__class__}(invalid_identifier='{self.identifier}')"
+            return f"{__class__}(invalid_identifier='{self.id}')"
+
             
 class InstanceGroup:
     def __init__(self, ec2_client=None, initial_instances: Optional[List[str]] = None): 
+        logging.debug("Created new InstanceGroup object")
         self.ec2_client = ec2_client if ec2_client is not None else boto3.client('ec2')
         self._instances: Set[StrippedAwsInstance] = set()
-        logging.debug("Created new InstanceGroup object")
+        
         if initial_instances:
             self.add_instances(initial_instances)
 
