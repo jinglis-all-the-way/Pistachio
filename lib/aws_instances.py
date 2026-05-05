@@ -14,42 +14,42 @@ class AwsEnviroment:
         self.available_instances = list[str]
 
     def get_all_instance_identifiers() -> list[str]:
-    """
-    Scans EC2 to find all running or pending instances and returns a list
-    of their identifiers (both Instance ID and Name tag).
+        """
+        Scans EC2 to find all running or pending instances and returns a list
+        of their identifiers (both Instance ID and Name tag).
 
-    Returns:
-        A list of strings, where each string is an Instance ID or a Name tag.
-        Returns an empty list if an error occurs.
-    """
-    try:
-        ec2_client = boto3.client('ec2')
-        
-        # A paginator automatically handles API calls to fetch all results
-        # when there are more items than a single call can return.
-        paginator = ec2_client.get_paginator('describe_instances')
+        Returns:
+            A list of strings, where each string is an Instance ID or a Name tag.
+            Returns an empty list if an error occurs.
+        """
+        try:
+            ec2_client = boto3.client('ec2')
+            
+            # A paginator automatically handles API calls to fetch all results
+            # when there are more items than a single call can return.
+            paginator = ec2_client.get_paginator('describe_instances')
 
-        # This creates an iterable that will yield each page of results.
-        pages = paginator.paginate()
+            # This creates an iterable that will yield each page of results.
+            pages = paginator.paginate()
 
-        all_identifiers = set()
+            all_identifiers = set()
 
-        # We must loop through pages, then reservations, then instances.
-        for page in pages:
-            for reservation in page.get('Reservations', []):
-                for instance in reservation.get('Instances', []):
-                    # Add the unique Instance ID
-                    if 'InstanceId' in instance:
-                        all_identifiers.add(instance['InstanceId'])
-        
-        return list(all_identifiers)
+            # We must loop through pages, then reservations, then instances.
+            for page in pages:
+                for reservation in page.get('Reservations', []):
+                    for instance in reservation.get('Instances', []):
+                        # Add the unique Instance ID
+                        if 'InstanceId' in instance:
+                            all_identifiers.add(instance['InstanceId'])
+            
+            return list(all_identifiers)
 
-    except ClientError as e:
-        print(f"An AWS API error occurred: {e}")
-        return []
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        return []
+        except ClientError as e:
+            print(f"An AWS API error occurred: {e}")
+            return []
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            return []
 
 class AwsEc2Instance:
     def __init__(self, identifier: str, ec2_client=None, ssm_client=None):
